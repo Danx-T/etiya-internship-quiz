@@ -114,5 +114,3 @@ coverage/
 # NestJS specific
 dist/
 build/ 
-
-README.md
