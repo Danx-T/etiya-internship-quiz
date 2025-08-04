@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Uygulaması</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- Login/Register Form -->
+        <div id="auth-container" class="auth-container">
+            <div class="auth-box">
+                <h2>Quiz Uygulaması</h2>
+                <div class="auth-tabs">
+                    <button class="tab-btn active" onclick="showTab('login')">Giriş</button>
+                    <button class="tab-btn" onclick="showTab('register')">Kayıt Ol</button>
+                </div>
+                
+                <!-- Login Form -->
+                <form id="login-form" class="auth-form">
+                    <input type="text" id="login-username" placeholder="Kullanıcı Adı" required>
+                    <input type="password" id="login-password" placeholder="Şifre" required>
+                    <button type="submit">Giriş Yap</button>
+                    <a href="#" class="forgot-password" onclick="showForgotPassword()">Şifremi Unuttum</a>
+                </form>
+                
+                <!-- Register Form -->
+                <form id="register-form" class="auth-form" style="display: none;">
+                    <input type="text" id="register-username" placeholder="Kullanıcı Adı" required>
+                    <input type="email" id="register-email" placeholder="Email" required>
+                    <input type="password" id="register-password" placeholder="Şifre" required>
+                    <button type="submit">Kayıt Ol</button>
+                </form>
+                
+                <!-- Forgot Password Modal -->
+                <div id="forgot-password-modal" class="modal" style="display: none;">
+                    <div class="modal-content">
+                        <span class="close" onclick="closeForgotPassword()">&times;</span>
+                        <h3>Şifremi Unuttum</h3>
+                        <p>Email adresinizi girin, şifre sıfırlama linki göndereceğiz.</p>
+                        <form id="forgot-password-form">
+                            <input type="email" id="forgot-email" placeholder="Email Adresiniz" required>
+                            <button type="submit">Gönder</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main App -->
+        <div id="main-app" class="main-app" style="display: none;">
+            <header class="header">
+                <h1>Quiz Uygulaması</h1>
+                <div class="user-info">
+                    <span id="username-display"></span>
+                    <button onclick="logout()">Çıkış</button>
+                </div>
+            </header>
+
+            <nav class="nav">
+                <button class="nav-btn active" onclick="showSection('quizzes')">Quizler</button>
+                <button class="nav-btn" onclick="showSection('my-results')">Sonuçlarım</button>
+                <button class="nav-btn" onclick="showSection('leaderboard')">Liderlik Tablosu</button>
+                <button class="nav-btn" onclick="showSection('profile')">Profil</button>
+            </nav>
+
+            <main class="main-content">
+                <!-- Quizzes Section -->
+                <div id="quizzes-section" class="section">
+                    <h2>Mevcut Quizler</h2>
+                    <div id="quizzes-list" class="quizzes-grid"></div>
+                </div>
+
+                <!-- Quiz Taking Section -->
+                <div id="quiz-taking-section" class="section" style="display: none;">
+                    <div class="quiz-header">
+                        <h2 id="quiz-title"></h2>
+                        <div class="timer">
+                            <span>Kalan Süre: </span>
+                            <span id="timer-display">00:00</span>
+                        </div>
+                    </div>
+                    <div id="quiz-content"></div>
+                    <div class="quiz-controls">
+                        <button id="prev-btn" onclick="previousQuestion()">Önceki</button>
+                        <span id="question-counter">Soru 1 / 10</span>
+                        <button id="next-btn" onclick="nextQuestion()">Sonraki</button>
+                        <button id="submit-btn" onclick="submitQuiz()" style="display: none;">Bitir</button>
+                    </div>
+                </div>
+
+                <!-- My Results Section -->
+                <div id="my-results-section" class="section" style="display: none;">
+                    <h2>Sonuçlarım</h2>
+                    <div id="results-list"></div>
+                </div>
+
+                <!-- Leaderboard Section -->
+                <div id="leaderboard-section" class="section" style="display: none;">
+                    <h2>Liderlik Tablosu</h2>
+                    <div class="leaderboard-filters">
+                        <select id="quiz-filter">
+                            <option value="">Tüm Quizler</option>
+                        </select>
+                    </div>
+                    <div id="leaderboard-list"></div>
+                </div>
+
+                <!-- Profile Section -->
+                <div id="profile-section" class="section" style="display: none;">
+                    <h2>Profil</h2>
+                    <div class="profile-info">
+                        <p><strong>Kullanıcı Adı:</strong> <span id="profile-username"></span></p>
+                        <p><strong>Email:</strong> <span id="profile-email"></span></p>
+                    </div>
+                    <form id="change-password-form" class="password-form">
+                        <h3>Şifre Değiştir</h3>
+                        <input type="password" id="current-password" placeholder="Mevcut Şifre" required>
+                        <input type="password" id="new-password" placeholder="Yeni Şifre" required>
+                        <button type="submit">Şifre Değiştir</button>
+                    </form>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html> 
