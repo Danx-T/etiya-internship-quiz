@@ -1,6 +1,7 @@
 import { Controller, Post, Body, UseGuards, Request, Get, Put } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
+import { MailService } from '../mail/mail.service';
 import { RegisterDto, LoginDto, ChangePasswordDto, UpdateProfileDto, ChangeEmailDto, VerifyNewEmailDto, ForgotPasswordDto, ResetPasswordDto } from './dto/auth.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 
@@ -9,6 +10,7 @@ export class AuthController {
   constructor(
     private authService: AuthService,
     private usersService: UsersService,
+    private mailService: MailService,
   ) {}
 
   @Post('register')
@@ -63,8 +65,8 @@ export class AuthController {
   async changeEmail(@Request() req, @Body() changeEmailDto: ChangeEmailDto) {
     const verificationCode = await this.usersService.initiateEmailChange(req.user.id, changeEmailDto.newEmail);
     
-    // Email gönderme işlemi burada yapılacak
-    // await this.mailService.sendEmailChangeVerification(changeEmailDto.newEmail, verificationCode);
+    // Email gönderme işlemi
+    await this.mailService.sendEmailVerification(changeEmailDto.newEmail, verificationCode);
     
     return { message: 'Doğrulama kodu yeni email adresinize gönderildi' };
   }
