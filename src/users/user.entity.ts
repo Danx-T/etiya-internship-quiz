@@ -18,6 +18,15 @@ export class User {
   @Column({ default: false })
   isAdmin: boolean;
 
+  @Column({ default: false })
+  isEmailVerified: boolean;
+
+  @Column({ nullable: true })
+  emailVerificationCode: string;
+
+  @Column({ nullable: true })
+  emailVerificationExpires: Date;
+
   @CreateDateColumn()
   createdAt: Date;
 

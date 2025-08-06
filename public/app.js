@@ -15,6 +15,14 @@ const mainApp = document.getElementById('main-app');
 const loginForm = document.getElementById('login-form');
 const registerForm = document.getElementById('register-form');
 
+// Email Verification Modal
+const emailVerificationModal = document.getElementById('email-verification-modal');
+const emailVerificationForm = document.getElementById('email-verification-form');
+const verificationCodeInput = document.getElementById('verification-code');
+const verificationInfo = document.getElementById('verification-info');
+const resendCodeBtn = document.getElementById('resend-code-btn');
+let pendingVerificationEmail = null;
+
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
     checkAuth();
@@ -104,10 +112,15 @@ async function handleRegister(e) {
         const data = await response.json();
         
         if (response.ok) {
-            localStorage.setItem('token', data.access_token);
-            currentUser = data.user;
-            showMainApp();
-            loadQuizzes();
+            if (data.user && data.user.isEmailVerified === false) {
+                pendingVerificationEmail = data.user.email;
+                showEmailVerificationModal();
+            } else {
+                localStorage.setItem('token', data.access_token);
+                currentUser = data.user;
+                showMainApp();
+                loadQuizzes();
+            }
         } else {
             alert(data.message || 'Kayıt başarısız');
         }
@@ -115,6 +128,54 @@ async function handleRegister(e) {
         alert('Bağlantı hatası');
     }
 }
+
+function showEmailVerificationModal() {
+    emailVerificationModal.style.display = 'flex';
+    verificationInfo.textContent = 'Kod 10 dakika geçerlidir.';
+    verificationCodeInput.value = '';
+}
+
+emailVerificationForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const code = verificationCodeInput.value.trim();
+    if (!pendingVerificationEmail) return;
+    try {
+        const response = await fetch(`${API_BASE}/auth/verify-email`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: pendingVerificationEmail, code }),
+        });
+        const data = await response.json();
+        if (response.ok) {
+            alert('E-posta doğrulandı! Artık giriş yapabilirsiniz.');
+            emailVerificationModal.style.display = 'none';
+            showTab('login');
+        } else {
+            verificationInfo.textContent = data.message || 'Doğrulama başarısız.';
+        }
+    } catch (error) {
+        verificationInfo.textContent = 'Bağlantı hatası';
+    }
+});
+
+resendCodeBtn.addEventListener('click', async () => {
+    if (!pendingVerificationEmail) return;
+    try {
+        const response = await fetch(`${API_BASE}/auth/resend-verification`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: pendingVerificationEmail }),
+        });
+        const data = await response.json();
+        if (response.ok) {
+            verificationInfo.textContent = 'Kod tekrar gönderildi. Lütfen e-posta adresinizi kontrol edin.';
+        } else {
+            verificationInfo.textContent = data.message || 'Kod tekrar gönderilemedi.';
+        }
+    } catch (error) {
+        verificationInfo.textContent = 'Bağlantı hatası';
+    }
+});
 
 // Fetch user profile
 async function fetchUserProfile() {

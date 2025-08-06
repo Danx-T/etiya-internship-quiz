@@ -8,6 +8,7 @@ import { PasswordReset } from './password-reset.entity';
 import { MailService } from '../mail/mail.service';
 import * as bcrypt from 'bcryptjs';
 import * as crypto from 'crypto';
+import { generateVerificationCode } from '../users/users.service';
 
 @Injectable()
 export class AuthService {
@@ -26,6 +27,9 @@ export class AuthService {
       registerDto.password,
     );
 
+    // Email doğrulama kodu gönder
+    await this.mailService.sendEmailVerification(user.email, user.emailVerificationCode);
+
     const payload = { username: user.username, sub: user.id };
     return {
       access_token: this.jwtService.sign(payload),
@@ -33,8 +37,30 @@ export class AuthService {
         id: user.id,
         username: user.username,
         email: user.email,
+        isEmailVerified: user.isEmailVerified,
       },
     };
+  }
+
+  async verifyEmail(email: string, code: string) {
+    const user = await this.usersService.findByEmail(email);
+    if (!user) {
+      throw new NotFoundException('Kullanıcı bulunamadı');
+    }
+    if (user.isEmailVerified) {
+      return { message: 'E-posta zaten doğrulanmış' };
+    }
+    if (!user.emailVerificationCode || !user.emailVerificationExpires) {
+      throw new UnauthorizedException('Doğrulama kodu bulunamadı');
+    }
+    if (user.emailVerificationCode !== code) {
+      throw new UnauthorizedException('Doğrulama kodu hatalı');
+    }
+    if (new Date() > user.emailVerificationExpires) {
+      throw new UnauthorizedException('Doğrulama kodunun süresi dolmuş');
+    }
+    await this.usersService.setEmailVerified(user.id);
+    return { message: 'E-posta başarıyla doğrulandı' };
   }
 
   async login(loginDto: LoginDto) {
@@ -42,12 +68,13 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('Geçersiz kullanıcı adı veya şifre');
     }
-
+    if (!user.isEmailVerified) {
+      throw new UnauthorizedException('E-posta adresiniz doğrulanmamış. Lütfen e-posta adresinize gelen kod ile hesabınızı doğrulayın.');
+    }
     const isPasswordValid = await bcrypt.compare(loginDto.password, user.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Geçersiz kullanıcı adı veya şifre');
     }
-
     const payload = { username: user.username, sub: user.id };
     return {
       access_token: this.jwtService.sign(payload),
@@ -119,5 +146,21 @@ export class AuthService {
     await this.passwordResetRepository.delete({ token: resetPasswordDto.token });
 
     return { message: 'Şifre başarıyla sıfırlandı' };
+  }
+
+  async resendEmailVerification(email: string) {
+    const user = await this.usersService.findByEmail(email);
+    if (!user) {
+      throw new NotFoundException('Kullanıcı bulunamadı');
+    }
+    if (user.isEmailVerified) {
+      return { message: 'E-posta zaten doğrulanmış' };
+    }
+    // Yeni kod ve süre üret
+    const code = generateVerificationCode(8);
+    const expires = new Date(Date.now() + 10 * 60 * 1000);
+    await this.usersService.updateEmailVerificationCode(user.id, code, expires);
+    await this.mailService.sendEmailVerification(user.email, code);
+    return { message: 'Doğrulama kodu tekrar gönderildi' };
   }
 } 

@@ -65,4 +65,33 @@ export class MailService {
       throw error;
     }
   }
+
+  async sendEmailVerification(email: string, code: string): Promise<void> {
+    try {
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: 'E-posta Doğrulama - Quiz Uygulaması',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h2 style="color: #333; text-align: center;">E-posta Doğrulama</h2>
+            <p style="color: #666; line-height: 1.6;">
+              Kayıt işlemini tamamlamak için aşağıdaki doğrulama kodunu kullanın:
+            </p>
+            <div style="text-align: center; margin: 30px 0;">
+              <span style="font-size: 2em; letter-spacing: 4px; background: #f3f3f3; padding: 10px 20px; border-radius: 8px; display: inline-block; font-weight: bold;">${code}</span>
+            </div>
+            <p style="color: #999; font-size: 14px; text-align: center;">
+              Bu kod 10 dakika geçerlidir.
+            </p>
+          </div>
+        `,
+      };
+      await this.transporter.sendMail(mailOptions);
+      console.log('✅ Email doğrulama kodu gönderildi!');
+    } catch (error) {
+      console.error('❌ Email doğrulama kodu gönderme hatası:', error);
+      throw error;
+    }
+  }
 } 

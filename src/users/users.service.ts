@@ -4,6 +4,15 @@ import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import * as bcrypt from 'bcryptjs';
 
+export function generateVerificationCode(length = 8): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let code = '';
+  for (let i = 0; i < length; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
+
 @Injectable()
 export class UsersService {
   constructor(
@@ -21,13 +30,33 @@ export class UsersService {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    const verificationCode = generateVerificationCode(8);
+    const verificationExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 dakika geçerli
     const user = this.usersRepository.create({
       username,
       email,
       password: hashedPassword,
+      isEmailVerified: false,
+      emailVerificationCode: verificationCode,
+      emailVerificationExpires: verificationExpires,
     });
 
     return this.usersRepository.save(user);
+  }
+
+  async setEmailVerified(userId: number): Promise<void> {
+    await this.usersRepository.update(userId, {
+      isEmailVerified: true,
+      emailVerificationCode: null,
+      emailVerificationExpires: null,
+    });
+  }
+
+  async updateEmailVerificationCode(userId: number, code: string, expires: Date): Promise<void> {
+    await this.usersRepository.update(userId, {
+      emailVerificationCode: code,
+      emailVerificationExpires: expires,
+    });
   }
 
   async findByUsername(username: string): Promise<User | null> {
