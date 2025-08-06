@@ -67,22 +67,6 @@ export class UsersService {
     return this.usersRepository.findOne({ where: { id } });
   }
 
-  async changePassword(userId: number, currentPassword: string, newPassword: string): Promise<void> {
-    const user = await this.findById(userId);
-    if (!user) {
-      throw new NotFoundException('Kullanıcı bulunamadı');
-    }
-
-    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
-    if (!isPasswordValid) {
-      throw new ConflictException('Mevcut şifre yanlış');
-    }
-
-    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-    user.password = hashedNewPassword;
-    await this.usersRepository.save(user);
-  }
-
   async findByEmail(email: string): Promise<User | null> {
     return this.usersRepository.findOne({ where: { email } });
   }

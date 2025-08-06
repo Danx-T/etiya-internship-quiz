@@ -11,6 +11,7 @@ import { MailModule } from './mail/mail.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: '.env',
     }),
     TypeOrmModule.forRoot({
       type: 'mysql',
@@ -22,11 +23,11 @@ import { MailModule } from './mail/mail.module';
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true, // Sadece geliştirme için
     }),
-                      AuthModule,
-      UsersModule,
-      QuizModule,
-      ResultsModule,
-      MailModule,
+    AuthModule,
+    UsersModule,
+    QuizModule,
+    ResultsModule,
+    MailModule,
   ],
 })
 export class AppModule {} 

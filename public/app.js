@@ -41,7 +41,6 @@ function checkAuth() {
 function setupEventListeners() {
     loginForm.addEventListener('submit', handleLogin);
     registerForm.addEventListener('submit', handleRegister);
-    document.getElementById('change-password-form').addEventListener('submit', handleChangePassword);
     document.getElementById('quiz-filter').addEventListener('change', loadLeaderboard);
     document.getElementById('forgot-password-form').addEventListener('submit', handleForgotPassword);
 }
@@ -525,31 +524,4 @@ async function loadLeaderboard() {
     }
 }
 
-// Handle change password
-async function handleChangePassword(e) {
-    e.preventDefault();
-    
-    const currentPassword = document.getElementById('current-password').value;
-    const newPassword = document.getElementById('new-password').value;
-    
-    try {
-        const response = await fetch(`${API_BASE}/auth/change-password`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            },
-            body: JSON.stringify({ currentPassword, newPassword }),
-        });
-        
-        if (response.ok) {
-            alert('Şifre başarıyla değiştirildi');
-            document.getElementById('change-password-form').reset();
-        } else {
-            const data = await response.json();
-            alert(data.message || 'Şifre değiştirilemedi');
-        }
-    } catch (error) {
-        alert('Bağlantı hatası');
-    }
-} 
+ 
