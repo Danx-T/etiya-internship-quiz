@@ -641,9 +641,8 @@ async function handleEmailChange(e) {
         });
         
         if (response.ok) {
-            alert('Doğrulama kodu yeni email adresinize gönderildi');
             document.getElementById('email-change-form').style.display = 'none';
-            document.getElementById('email-verification-form-profile').style.display = 'block';
+            showEmailVerificationModal(newEmail);
         } else {
             const data = await response.json();
             alert(data.message || 'Email değiştirilemedi');
@@ -653,8 +652,17 @@ async function handleEmailChange(e) {
     }
 }
 
-function cancelEmailVerification() {
-    document.getElementById('email-verification-form-profile').style.display = 'none';
+function showEmailVerificationModal(email) {
+    const modal = document.getElementById('email-verification-modal');
+    const modalContent = modal.querySelector('.modal-content p');
+    
+    modalContent.textContent = `${email} adresine kod gönderildi.`;
+    modal.style.display = 'flex';
+    document.getElementById('email-verification-code').value = '';
+}
+
+function closeEmailVerificationModal() {
+    document.getElementById('email-verification-modal').style.display = 'none';
 }
 
 async function handleEmailVerification(e) {
@@ -674,9 +682,9 @@ async function handleEmailVerification(e) {
         
         if (response.ok) {
             alert('Email adresi başarıyla değiştirildi');
+            closeEmailVerificationModal();
             // Refresh user data
             await fetchUserProfile();
-            cancelEmailVerification();
         } else {
             const data = await response.json();
             alert(data.message || 'Email doğrulanamadı');

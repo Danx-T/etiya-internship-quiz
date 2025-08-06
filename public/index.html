@@ -34,32 +34,6 @@
                     <button type="submit">Kayıt Ol</button>
                 </form>
                 
-                <!-- Forgot Password Modal -->
-                <div id="forgot-password-modal" class="modal" style="display: none;">
-                    <div class="modal-content">
-                        <span class="close" onclick="closeForgotPassword()">&times;</span>
-                        <h3>Şifremi Unuttum</h3>
-                        <p>Email adresinizi girin, şifre sıfırlama linki göndereceğiz.</p>
-                        <form id="forgot-password-form">
-                            <input type="email" id="forgot-email" placeholder="Email Adresiniz" required>
-                            <button type="submit">Gönder</button>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- Email Verification Modal -->
-                <div id="email-verification-modal" class="modal" style="display: none;">
-                    <div class="modal-content">
-                        <h3>E-posta Doğrulama</h3>
-                        <p>Kayıt işlemini tamamlamak için e-posta adresinize gönderilen doğrulama kodunu girin.</p>
-                        <form id="email-verification-form">
-                            <input type="text" id="verification-code" placeholder="Doğrulama Kodu" required>
-                            <button type="submit">Doğrula</button>
-                        </form>
-                        <p id="verification-info" style="color: #888; font-size: 13px; margin-top: 10px;"></p>
-                        <button id="resend-code-btn" type="button" style="margin-top: 10px;">Kodu Tekrar Gönder</button>
-                    </div>
-                </div>
             </div>
         </div>
 
@@ -169,16 +143,6 @@
                                     <button type="button" onclick="cancelEmailEdit()">İptal</button>
                                 </div>
                             </form>
-                            
-                            <!-- Email Verification Form -->
-                            <form id="email-verification-form-profile" class="edit-form" style="display: none;">
-                                <p>Yeni email adresinize gönderilen doğrulama kodunu girin.</p>
-                                <input type="text" id="email-verification-code" placeholder="Doğrulama Kodu" required>
-                                <div class="form-buttons">
-                                    <button type="submit">Doğrula</button>
-                                    <button type="button" onclick="cancelEmailVerification()">İptal</button>
-                                </div>
-                            </form>
                         </div>
                     </div>
 
@@ -195,6 +159,38 @@
                     </div>
                 </div>
             </main>
+        </div>
+    </div>
+
+    <!-- Email Verification Modal -->
+    <div id="email-verification-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEmailVerificationModal()">&times;</span>
+            <h3>Email Doğrulama</h3>
+            <p>Email adresinize doğrulama kodu gönderildi. Lütfen kodu girin.</p>
+            <form id="email-verification-form-profile">
+                <input type="text" id="email-verification-code" placeholder="Doğrulama Kodu" required>
+                <div class="form-buttons">
+                    <button type="submit">Doğrula</button>
+                    <button type="button" onclick="closeEmailVerificationModal()">İptal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgot-password-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeForgotPassword()">&times;</span>
+            <h3>Şifremi Unuttum</h3>
+            <p>Email adresinizi girin, şifre sıfırlama linki göndereceğiz.</p>
+            <form id="forgot-password-form">
+                <input type="email" id="forgot-email" placeholder="Email Adresiniz" required>
+                <div class="form-buttons">
+                    <button type="submit">Gönder</button>
+                    <button type="button" onclick="closeForgotPassword()">İptal</button>
+                </div>
+            </form>
         </div>
     </div>
 
