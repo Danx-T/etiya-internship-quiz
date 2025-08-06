@@ -43,6 +43,13 @@ function setupEventListeners() {
     registerForm.addEventListener('submit', handleRegister);
     document.getElementById('quiz-filter').addEventListener('change', loadLeaderboard);
     document.getElementById('forgot-password-form').addEventListener('submit', handleForgotPassword);
+    
+    // Profile event listeners
+    document.getElementById('change-password-form').addEventListener('submit', handleChangePassword);
+    document.getElementById('username-edit-form').addEventListener('submit', handleUsernameUpdate);
+    document.getElementById('email-change-form').addEventListener('submit', handleEmailChange);
+    document.getElementById('email-verification-form-profile').addEventListener('submit', handleEmailVerification);
+    document.getElementById('photo-upload').addEventListener('change', handlePhotoUpload);
 }
 
 // Show tab function
@@ -178,21 +185,30 @@ resendCodeBtn.addEventListener('click', async () => {
 
 // Fetch user profile
 async function fetchUserProfile() {
+    const token = localStorage.getItem('token');
+    console.log('fetchUserProfile - Token:', token);
+    console.log('fetchUserProfile - Token length:', token?.length);
+    
     try {
         const response = await fetch(`${API_BASE}/auth/profile`, {
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Authorization': `Bearer ${token}`,
             },
         });
+        
+        console.log('fetchUserProfile - Response status:', response.status);
+        console.log('fetchUserProfile - Response ok:', response.ok);
         
         if (response.ok) {
             currentUser = await response.json();
             showMainApp();
             loadQuizzes();
         } else {
+            console.log('fetchUserProfile - Unauthorized, removing token');
             localStorage.removeItem('token');
         }
     } catch (error) {
+        console.log('fetchUserProfile - Error:', error);
         localStorage.removeItem('token');
     }
 }
@@ -204,6 +220,11 @@ function showMainApp() {
     document.getElementById('username-display').textContent = currentUser.username;
     document.getElementById('profile-username').textContent = currentUser.username;
     document.getElementById('profile-email').textContent = currentUser.email;
+    
+    // Set profile photo if exists
+    if (currentUser.profilePhoto) {
+        document.getElementById('profile-photo-img').src = currentUser.profilePhoto;
+    }
 }
 
 // Logout
@@ -521,6 +542,178 @@ async function loadLeaderboard() {
         }
     } catch (error) {
         console.error('Liderlik tablosu yüklenemedi:', error);
+    }
+}
+
+// Profile Management Functions
+
+// Handle change password
+async function handleChangePassword(e) {
+    e.preventDefault();
+    
+    const currentPassword = document.getElementById('current-password').value;
+    const newPassword = document.getElementById('new-password').value;
+    
+    try {
+        const response = await fetch(`${API_BASE}/auth/change-password`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            },
+            body: JSON.stringify({ currentPassword, newPassword }),
+        });
+        
+        if (response.ok) {
+            alert('Şifre başarıyla değiştirildi');
+            document.getElementById('change-password-form').reset();
+        } else {
+            const data = await response.json();
+            alert(data.message || 'Şifre değiştirilemedi');
+        }
+    } catch (error) {
+        alert('Bağlantı hatası');
+    }
+}
+
+// Username editing functions
+function editUsername() {
+    document.getElementById('username-edit-form').style.display = 'block';
+    document.getElementById('new-username').value = currentUser.username;
+}
+
+function cancelUsernameEdit() {
+    document.getElementById('username-edit-form').style.display = 'none';
+}
+
+async function handleUsernameUpdate(e) {
+    e.preventDefault();
+    
+    const newUsername = document.getElementById('new-username').value;
+    
+    try {
+        const response = await fetch(`${API_BASE}/auth/profile/username`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            },
+            body: JSON.stringify({ username: newUsername }),
+        });
+        
+        if (response.ok) {
+            alert('Kullanıcı adı başarıyla güncellendi');
+            currentUser.username = newUsername;
+            document.getElementById('profile-username').textContent = newUsername;
+            document.getElementById('username-display').textContent = newUsername;
+            cancelUsernameEdit();
+        } else {
+            const data = await response.json();
+            alert(data.message || 'Kullanıcı adı güncellenemedi');
+        }
+    } catch (error) {
+        alert('Bağlantı hatası');
+    }
+}
+
+// Email editing functions
+function editEmail() {
+    document.getElementById('email-change-form').style.display = 'block';
+}
+
+function cancelEmailEdit() {
+    document.getElementById('email-change-form').style.display = 'none';
+}
+
+async function handleEmailChange(e) {
+    e.preventDefault();
+    
+    const newEmail = document.getElementById('new-email').value;
+    
+    try {
+        const response = await fetch(`${API_BASE}/auth/change-email`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            },
+            body: JSON.stringify({ newEmail }),
+        });
+        
+        if (response.ok) {
+            alert('Doğrulama kodu yeni email adresinize gönderildi');
+            document.getElementById('email-change-form').style.display = 'none';
+            document.getElementById('email-verification-form-profile').style.display = 'block';
+        } else {
+            const data = await response.json();
+            alert(data.message || 'Email değiştirilemedi');
+        }
+    } catch (error) {
+        alert('Bağlantı hatası');
+    }
+}
+
+function cancelEmailVerification() {
+    document.getElementById('email-verification-form-profile').style.display = 'none';
+}
+
+async function handleEmailVerification(e) {
+    e.preventDefault();
+    
+    const code = document.getElementById('email-verification-code').value;
+    
+    try {
+        const response = await fetch(`${API_BASE}/auth/verify-new-email`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            },
+            body: JSON.stringify({ code }),
+        });
+        
+        if (response.ok) {
+            alert('Email adresi başarıyla değiştirildi');
+            // Refresh user data
+            await fetchUserProfile();
+            cancelEmailVerification();
+        } else {
+            const data = await response.json();
+            alert(data.message || 'Email doğrulanamadı');
+        }
+    } catch (error) {
+        alert('Bağlantı hatası');
+    }
+}
+
+// Profile photo functions
+async function handlePhotoUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    // For now, we'll use a placeholder URL
+    // In a real app, you'd upload to a server and get the URL
+    const photoUrl = URL.createObjectURL(file);
+    
+    try {
+        const response = await fetch(`${API_BASE}/auth/profile/photo`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            },
+            body: JSON.stringify({ photoUrl }),
+        });
+        
+        if (response.ok) {
+            document.getElementById('profile-photo-img').src = photoUrl;
+            alert('Profil fotoğrafı başarıyla güncellendi');
+        } else {
+            const data = await response.json();
+            alert(data.message || 'Profil fotoğrafı güncellenemedi');
+        }
+    } catch (error) {
+        alert('Bağlantı hatası');
     }
 }
 

@@ -1,7 +1,7 @@
-import { Controller, Post, Body, UseGuards, Request, Get } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Request, Get, Put } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
-import { RegisterDto, LoginDto, ForgotPasswordDto, ResetPasswordDto } from './dto/auth.dto';
+import { RegisterDto, LoginDto, ChangePasswordDto, UpdateProfileDto, ChangeEmailDto, VerifyNewEmailDto, ForgotPasswordDto, ResetPasswordDto } from './dto/auth.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Controller('auth')
@@ -29,7 +29,51 @@ export class AuthController {
       id: user.id,
       username: user.username,
       email: user.email,
+      profilePhoto: user.profilePhoto,
     };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put('profile/username')
+  async updateUsername(@Request() req, @Body() updateProfileDto: UpdateProfileDto) {
+    await this.usersService.updateUsername(req.user.id, updateProfileDto.username);
+    return { message: 'Kullanıcı adı başarıyla güncellendi' };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put('profile/photo')
+  async updateProfilePhoto(@Request() req, @Body() body: { photoUrl: string }) {
+    await this.usersService.updateProfilePhoto(req.user.id, body.photoUrl);
+    return { message: 'Profil fotoğrafı başarıyla güncellendi' };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('change-password')
+  async changePassword(@Request() req, @Body() changePasswordDto: ChangePasswordDto) {
+    await this.usersService.changePassword(
+      req.user.id,
+      changePasswordDto.currentPassword,
+      changePasswordDto.newPassword,
+    );
+    return { message: 'Şifre başarıyla değiştirildi' };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('change-email')
+  async changeEmail(@Request() req, @Body() changeEmailDto: ChangeEmailDto) {
+    const verificationCode = await this.usersService.initiateEmailChange(req.user.id, changeEmailDto.newEmail);
+    
+    // Email gönderme işlemi burada yapılacak
+    // await this.mailService.sendEmailChangeVerification(changeEmailDto.newEmail, verificationCode);
+    
+    return { message: 'Doğrulama kodu yeni email adresinize gönderildi' };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('verify-new-email')
+  async verifyNewEmail(@Request() req, @Body() verifyNewEmailDto: VerifyNewEmailDto) {
+    await this.usersService.verifyNewEmail(req.user.id, verifyNewEmailDto.code);
+    return { message: 'Email adresi başarıyla değiştirildi' };
   }
 
   @Post('forgot-password')

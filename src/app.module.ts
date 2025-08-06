@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { PassportModule } from '@nestjs/passport';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { QuizModule } from './quiz/quiz.module';
@@ -23,6 +24,7 @@ import { MailModule } from './mail/mail.module';
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true, // Sadece geliştirme için
     }),
+    PassportModule,
     AuthModule,
     UsersModule,
     QuizModule,

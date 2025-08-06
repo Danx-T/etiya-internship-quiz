@@ -125,10 +125,76 @@
                 <!-- Profile Section -->
                 <div id="profile-section" class="section" style="display: none;">
                     <h2>Profil</h2>
-                    <div class="profile-info">
-                        <p><strong>Kullanıcı Adı:</strong> <span id="profile-username"></span></p>
-                        <p><strong>Email:</strong> <span id="profile-email"></span></p>
+                    
+                    <!-- Profile Photo -->
+                    <div class="profile-photo-section">
+                        <div class="profile-photo">
+                            <img id="profile-photo-img" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgdmlld0JveD0iMCAwIDE1MCAxNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxNTAiIGhlaWdodD0iMTUwIiBmaWxsPSIjRjVGNUY1Ii8+CjxjaXJjbGUgY3g9Ijc1IiBjeT0iNjAiIHI9IjIwIiBmaWxsPSIjQ0NDIi8+CjxwYXRoIGQ9Ik0yNSA5NUMyNSA4NS4wNTc2IDMzLjA1NzYgNzcgNDMgNzdIMTA3QzExNi45NDIgNzcgMTI1IDg1LjA1NzYgMTI1IDk1VjEyNUMxMjUgMTM0Ljk0MiAxMTYuOTQyIDE0MyAxMDcgMTQzSDQzQzMzLjA1NzYgMTQzIDI1IDEzNC45NDIgMjUgMTI1Vjk1WiIgZmlsbD0iI0NDQyIvPgo8L3N2Zz4K" alt="Profil Fotoğrafı">
+                            <div class="photo-overlay">
+                                <label for="photo-upload" class="photo-upload-btn">Fotoğraf Değiştir</label>
+                                <input type="file" id="photo-upload" accept="image/*" style="display: none;">
+                            </div>
+                        </div>
                     </div>
+
+                    <!-- Profile Info -->
+                    <div class="profile-info">
+                        <div class="info-item">
+                            <label>Kullanıcı Adı:</label>
+                            <div class="editable-field">
+                                <span id="profile-username"></span>
+                                <button onclick="editUsername()" class="edit-btn">Düzenle</button>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <label>Email:</label>
+                            <div class="editable-field">
+                                <span id="profile-email"></span>
+                                <button onclick="editEmail()" class="edit-btn">Değiştir</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Username Edit Form -->
+                    <form id="username-edit-form" class="edit-form" style="display: none;">
+                        <h3>Kullanıcı Adı Değiştir</h3>
+                        <input type="text" id="new-username" placeholder="Yeni Kullanıcı Adı" required>
+                        <div class="form-buttons">
+                            <button type="submit">Kaydet</button>
+                            <button type="button" onclick="cancelUsernameEdit()">İptal</button>
+                        </div>
+                    </form>
+
+                    <!-- Email Change Form -->
+                    <form id="email-change-form" class="edit-form" style="display: none;">
+                        <h3>Email Değiştir</h3>
+                        <input type="email" id="new-email" placeholder="Yeni Email Adresi" required>
+                        <div class="form-buttons">
+                            <button type="submit">Değiştir</button>
+                            <button type="button" onclick="cancelEmailEdit()">İptal</button>
+                        </div>
+                    </form>
+
+                    <!-- Email Verification Form -->
+                    <form id="email-verification-form-profile" class="edit-form" style="display: none;">
+                        <h3>Email Doğrulama</h3>
+                        <p>Yeni email adresinize gönderilen doğrulama kodunu girin.</p>
+                        <input type="text" id="email-verification-code" placeholder="Doğrulama Kodu" required>
+                        <div class="form-buttons">
+                            <button type="submit">Doğrula</button>
+                            <button type="button" onclick="cancelEmailVerification()">İptal</button>
+                        </div>
+                    </form>
+
+                    <!-- Password Change Form -->
+                    <form id="change-password-form" class="edit-form">
+                        <h3>Şifre Değiştir</h3>
+                        <input type="password" id="current-password" placeholder="Mevcut Şifre" required>
+                        <input type="password" id="new-password" placeholder="Yeni Şifre" required>
+                        <div class="form-buttons">
+                            <button type="submit">Şifre Değiştir</button>
+                        </div>
+                    </form>
                 </div>
             </main>
         </div>

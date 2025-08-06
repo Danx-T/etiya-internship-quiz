@@ -21,6 +21,31 @@ export class LoginDto {
   password: string;
 }
 
+export class ChangePasswordDto {
+  @IsString()
+  currentPassword: string;
+
+  @IsString()
+  @MinLength(6)
+  newPassword: string;
+}
+
+export class UpdateProfileDto {
+  @IsString()
+  @MinLength(3)
+  username: string;
+}
+
+export class ChangeEmailDto {
+  @IsEmail()
+  newEmail: string;
+}
+
+export class VerifyNewEmailDto {
+  @IsString()
+  code: string;
+}
+
 export class ForgotPasswordDto {
   @IsEmail()
   email: string;

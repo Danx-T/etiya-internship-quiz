@@ -27,6 +27,24 @@ export class User {
   @Column({ nullable: true })
   emailVerificationExpires: Date;
 
+  @Column({ nullable: true })
+  profilePhoto: string;
+
+  @Column({ nullable: true })
+  newEmail: string;
+
+  @Column({ nullable: true })
+  newEmailVerificationCode: string;
+
+  @Column({ nullable: true })
+  newEmailVerificationExpires: Date;
+
+  @Column({ nullable: true })
+  passwordChangeToken: string;
+
+  @Column({ nullable: true })
+  passwordChangeExpires: Date;
+
   @CreateDateColumn()
   createdAt: Date;
 
