@@ -278,6 +278,29 @@ body {
     background-color: #dc3545;
 }
 
+.resend-button {
+    width: 100%;
+    margin-top: 10px;
+    padding: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    border-radius: 6px;
+    background-color: #6c757d;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.resend-button:hover {
+    background-color: #5a6268;
+}
+
+.resend-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
 @keyframes spin {
     0% { transform: translateY(-50%) rotate(0deg); }
     100% { transform: translateY(-50%) rotate(360deg); }

@@ -257,22 +257,56 @@ document.getElementById('email-verification-form').addEventListener('submit', as
     }
 });
 
-resendCodeBtn.addEventListener('click', async () => {
+document.getElementById('resend-code-btn').addEventListener('click', async (e) => {
+    const button = e.target;
+    const messageDisplay = document.querySelector('.verification-message');
+    
     if (!pendingVerificationEmail) return;
+
+    // Butonu devre dışı bırak
+    button.disabled = true;
+    button.textContent = 'Kod Gönderiliyor...';
+    messageDisplay.textContent = '';
+    messageDisplay.className = 'verification-message';
+
     try {
         const response = await fetch(`${API_BASE}/auth/resend-verification`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: pendingVerificationEmail }),
         });
+        
         const data = await response.json();
+        
         if (response.ok) {
-            verificationInfo.textContent = 'Kod tekrar gönderildi. Lütfen e-posta adresinizi kontrol edin.';
+            messageDisplay.textContent = 'Yeni kod email adresinize gönderildi!';
+            messageDisplay.className = 'verification-message success';
+            
+            // 60 saniye geri sayım başlat
+            let countdown = 60;
+            button.textContent = `Tekrar Gönder (${countdown})`;
+            
+            const timer = setInterval(() => {
+                countdown--;
+                if (countdown <= 0) {
+                    clearInterval(timer);
+                    button.disabled = false;
+                    button.textContent = 'Kodu Tekrar Gönder';
+                } else {
+                    button.textContent = `Tekrar Gönder (${countdown})`;
+                }
+            }, 1000);
         } else {
-            verificationInfo.textContent = data.message || 'Kod tekrar gönderilemedi.';
+            messageDisplay.textContent = data.message || 'Kod gönderilemedi';
+            messageDisplay.className = 'verification-message error';
+            button.disabled = false;
+            button.textContent = 'Kodu Tekrar Gönder';
         }
     } catch (error) {
-        verificationInfo.textContent = 'Bağlantı hatası';
+        messageDisplay.textContent = 'Bağlantı hatası! Lütfen tekrar deneyin.';
+        messageDisplay.className = 'verification-message error';
+        button.disabled = false;
+        button.textContent = 'Kodu Tekrar Gönder';
     }
 });
 
