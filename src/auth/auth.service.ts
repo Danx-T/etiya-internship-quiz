@@ -77,7 +77,7 @@ export class AuthService {
     }
     
     const payload = { username: user.username, sub: user.id };
-    const token = this.jwtService.sign(payload);
+    const token = this.jwtService.sign(payload, { expiresIn: '1h' }); // 1 saatlik token
     
     return {
       access_token: token,

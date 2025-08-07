@@ -29,6 +29,11 @@ document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
 });
 
+// Sekme/pencere kapatıldığında token'ı sil
+window.addEventListener('beforeunload', () => {
+    localStorage.removeItem('token');
+});
+
 // Check if user is authenticated
 function checkAuth() {
     const token = localStorage.getItem('token');
