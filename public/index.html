@@ -22,6 +22,7 @@
                 <form id="login-form" class="auth-form">
                     <input type="text" id="login-username" placeholder="Kullanıcı Adı" required>
                     <input type="password" id="login-password" placeholder="Şifre" required>
+                    <div id="login-error" class="message"></div>
                     <button type="submit">Giriş Yap</button>
                     <a href="#" class="forgot-password" onclick="showForgotPassword()">Şifremi Unuttum</a>
                 </form>
@@ -31,6 +32,7 @@
                     <input type="text" id="register-username" placeholder="Kullanıcı Adı" required>
                     <input type="email" id="register-email" placeholder="Email" required>
                     <input type="password" id="register-password" placeholder="Şifre" required>
+                    <div id="register-error" class="message"></div>
                     <button type="submit">Kayıt Ol</button>
                 </form>
                 
@@ -199,6 +201,7 @@
             <p>Email adresinizi girin, şifre sıfırlama linki göndereceğiz.</p>
             <form id="forgot-password-form">
                 <input type="email" id="forgot-email" placeholder="Email Adresiniz" required>
+                <div id="forgot-password-message" class="message"></div>
                 <div class="form-buttons">
                     <button type="submit">Gönder</button>
                     <button type="button" onclick="closeForgotPassword()">İptal</button>

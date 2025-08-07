@@ -63,6 +63,12 @@ function showTab(tab) {
     tabs.forEach(t => t.classList.remove('active'));
     event.target.classList.add('active');
     
+    // Mesajları temizle
+    document.getElementById('login-error').textContent = '';
+    document.getElementById('login-error').className = 'message';
+    document.getElementById('register-error').textContent = '';
+    document.getElementById('register-error').className = 'message';
+    
     if (tab === 'login') {
         document.getElementById('login-form').style.display = 'flex';
         document.getElementById('register-form').style.display = 'none';
@@ -78,6 +84,11 @@ async function handleLogin(e) {
     
     const username = document.getElementById('login-username').value;
     const password = document.getElementById('login-password').value;
+    const messageElement = document.getElementById('login-error');
+    
+    // Mesajı temizle
+    messageElement.textContent = '';
+    messageElement.className = 'message';
     
     try {
         const response = await fetch(`${API_BASE}/auth/login`, {
@@ -91,15 +102,25 @@ async function handleLogin(e) {
         const data = await response.json();
         
         if (response.ok) {
+            // Email doğrulanmış mı kontrol et
+            if (data.user && data.user.isEmailVerified === false) {
+                pendingVerificationEmail = data.user.email;
+                messageElement.innerHTML = 'Hesabınızı kullanabilmek için e-postanızı <span class="verify-link" onclick="handleUnverifiedLogin()">doğrulayın</span>.';
+                messageElement.className = 'message error';
+                return;
+            }
+            
             localStorage.setItem('token', data.access_token);
             currentUser = data.user;
             showMainApp();
             loadQuizzes();
         } else {
-            alert(data.message || 'Giriş başarısız');
+            messageElement.textContent = data.message || 'Giriş başarısız';
+            messageElement.className = 'message error';
         }
     } catch (error) {
-        alert('Bağlantı hatası');
+        messageElement.textContent = 'Bağlantı hatası';
+        messageElement.className = 'message error';
     }
 }
 
@@ -110,6 +131,11 @@ async function handleRegister(e) {
     const username = document.getElementById('register-username').value;
     const email = document.getElementById('register-email').value;
     const password = document.getElementById('register-password').value;
+    const messageElement = document.getElementById('register-error');
+    
+    // Mesajı temizle
+    messageElement.textContent = '';
+    messageElement.className = 'message';
     
     try {
         const response = await fetch(`${API_BASE}/auth/register`, {
@@ -133,10 +159,12 @@ async function handleRegister(e) {
                 loadQuizzes();
             }
         } else {
-            alert(data.message || 'Kayıt başarısız');
+            messageElement.textContent = data.message || 'Kayıt başarısız';
+            messageElement.className = 'message error';
         }
     } catch (error) {
-        alert('Bağlantı hatası');
+        messageElement.textContent = 'Bağlantı hatası';
+        messageElement.className = 'message error';
     }
 }
 
@@ -144,6 +172,23 @@ function showEmailVerificationModal() {
     emailVerificationModal.style.display = 'flex';
     verificationInfo.textContent = 'Kod 10 dakika geçerlidir.';
     verificationCodeInput.value = '';
+}
+
+async function handleUnverifiedLogin() {
+    // Email doğrulama kodu gönder ve modalı aç
+    try {
+        await fetch(`${API_BASE}/auth/resend-email-verification`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email: pendingVerificationEmail }),
+        });
+    } catch (error) {
+        console.error('Kod gönderme hatası:', error);
+    }
+    
+    showEmailVerificationModal();
 }
 
 document.getElementById('email-verification-form').addEventListener('submit', async (e) => {
@@ -323,14 +368,19 @@ function showForgotPassword() {
 }
 
 function closeForgotPassword() {
-    document.getElementById('forgot-password-modal').style.display = 'none';
+    const modal = document.getElementById('forgot-password-modal');
+    const messageElement = document.getElementById('forgot-password-message');
+    modal.style.display = 'none';
     document.getElementById('forgot-email').value = '';
+    messageElement.textContent = '';
+    messageElement.className = 'message';
 }
 
 async function handleForgotPassword(e) {
     e.preventDefault();
     
     const email = document.getElementById('forgot-email').value;
+    const messageElement = document.getElementById('forgot-password-message');
     
     try {
         const response = await fetch(`${API_BASE}/auth/forgot-password`, {
@@ -344,13 +394,20 @@ async function handleForgotPassword(e) {
         const data = await response.json();
         
         if (response.ok) {
-            alert('Şifre sıfırlama linki email adresinize gönderildi!');
-            closeForgotPassword();
+            messageElement.textContent = 'Şifre sıfırlama linki email adresinize gönderildi!';
+            messageElement.className = 'message success';
+            
+            // 3 saniye sonra modalı kapat
+            setTimeout(() => {
+                closeForgotPassword();
+            }, 3000);
         } else {
-            alert(data.message || 'Bir hata oluştu');
+            messageElement.textContent = data.message || 'Bir hata oluştu';
+            messageElement.className = 'message error';
         }
     } catch (error) {
-        alert('Bağlantı hatası');
+        messageElement.textContent = 'Bağlantı hatası';
+        messageElement.className = 'message error';
     }
 }
 

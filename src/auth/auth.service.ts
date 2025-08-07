@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, NotFoundException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, NotFoundException, ConflictException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -140,6 +140,12 @@ export class AuthService {
     const user = await this.usersService.findByEmail(passwordReset.email);
     if (!user) {
       throw new NotFoundException('Kullanıcı bulunamadı');
+    }
+
+    // Yeni şifrenin mevcut şifre ile aynı olup olmadığını kontrol et
+    const isSamePassword = await bcrypt.compare(resetPasswordDto.newPassword, user.password);
+    if (isSamePassword) {
+      throw new ConflictException('Yeni şifre mevcut şifre ile aynı olamaz');
     }
 
     // Şifreyi güncelle
