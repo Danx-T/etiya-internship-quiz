@@ -1,61 +1,61 @@
 import { IsEmail, IsString, MinLength, IsOptional } from 'class-validator';
 
 export class RegisterDto {
-  @IsString()
-  @MinLength(3)
+  @IsString({ message: 'Kullanıcı adı bir metin olmalıdır' })
+  @MinLength(3, { message: 'Kullanıcı adı en az 3 karakter uzunluğunda olmalıdır' })
   username: string;
 
-  @IsEmail()
+  @IsEmail({}, { message: 'Geçerli bir email adresi giriniz' })
   email: string;
 
-  @IsString()
-  @MinLength(6)
+  @IsString({ message: 'Şifre bir metin olmalıdır' })
+  @MinLength(6, { message: 'Şifre en az 6 karakter uzunluğunda olmalıdır' })
   password: string;
 }
 
 export class LoginDto {
-  @IsString()
+  @IsString({ message: 'Kullanıcı adı bir metin olmalıdır' })
   username: string;
 
-  @IsString()
+  @IsString({ message: 'Şifre bir metin olmalıdır' })
   password: string;
 }
 
 export class ChangePasswordDto {
-  @IsString()
+  @IsString({ message: 'Mevcut şifre bir metin olmalıdır' })
   currentPassword: string;
 
-  @IsString()
-  @MinLength(6)
+  @IsString({ message: 'Yeni şifre bir metin olmalıdır' })
+  @MinLength(6, { message: 'Yeni şifre en az 6 karakter uzunluğunda olmalıdır' })
   newPassword: string;
 }
 
 export class UpdateProfileDto {
-  @IsString()
-  @MinLength(3)
+  @IsString({ message: 'Kullanıcı adı bir metin olmalıdır' })
+  @MinLength(3, { message: 'Kullanıcı adı en az 3 karakter uzunluğunda olmalıdır' })
   username: string;
 }
 
 export class ChangeEmailDto {
-  @IsEmail()
+  @IsEmail({}, { message: 'Geçerli bir email adresi giriniz' })
   newEmail: string;
 }
 
 export class VerifyNewEmailDto {
-  @IsString()
+  @IsString({ message: 'Doğrulama kodu bir metin olmalıdır' })
   code: string;
 }
 
 export class ForgotPasswordDto {
-  @IsEmail()
+  @IsEmail({}, { message: 'Geçerli bir email adresi giriniz' })
   email: string;
 }
 
 export class ResetPasswordDto {
-  @IsString()
+  @IsString({ message: 'Token bir metin olmalıdır' })
   token: string;
 
-  @IsString()
-  @MinLength(6)
+  @IsString({ message: 'Şifre bir metin olmalıdır' })
+  @MinLength(6, { message: 'Şifre en az 6 karakter uzunluğunda olmalıdır' })
   newPassword: string;
 } 

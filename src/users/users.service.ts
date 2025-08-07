@@ -93,6 +93,12 @@ export class UsersService {
       throw new ConflictException('Mevcut şifre yanlış');
     }
 
+    // Yeni şifrenin mevcut şifre ile aynı olup olmadığını kontrol et
+    const isSamePassword = await bcrypt.compare(newPassword, user.password);
+    if (isSamePassword) {
+      throw new ConflictException('Yeni şifre mevcut şifre ile aynı olamaz');
+    }
+
     const hashedNewPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedNewPassword;
     await this.usersRepository.save(user);
