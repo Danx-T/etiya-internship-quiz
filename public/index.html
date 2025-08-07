@@ -175,11 +175,14 @@
             <span class="close" onclick="closeEmailVerificationModal()">&times;</span>
             <h3>Email Doğrulama</h3>
             <p>Email adresinize doğrulama kodu gönderildi. Lütfen kodu girin.</p>
-            <form id="email-verification-form-profile">
-                <input type="text" id="email-verification-code" placeholder="Doğrulama Kodu" required>
+            <form id="email-verification-form">
+                <div class="verification-input-container">
+                    <input type="text" id="email-verification-code" placeholder="Doğrulama Kodu" maxlength="8" required>
+                    <div class="verification-status"></div>
+                </div>
+                <div class="verification-message"></div>
                 <div class="form-buttons">
-                    <button type="submit">Doğrula</button>
-                    <button type="button" onclick="closeEmailVerificationModal()">İptal</button>
+                    <button type="submit" class="verify-button">Doğrula</button>
                 </div>
             </form>
         </div>
