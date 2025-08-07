@@ -105,10 +105,14 @@
                         <div class="profile-photo">
                             <img id="profile-photo-img" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgdmlld0JveD0iMCAwIDE1MCAxNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxNTAiIGhlaWdodD0iMTUwIiBmaWxsPSIjRjVGNUY1Ii8+CjxjaXJjbGUgY3g9Ijc1IiBjeT0iNjAiIHI9IjIwIiBmaWxsPSIjQ0NDIi8+CjxwYXRoIGQ9Ik0yNSA5NUMyNSA4NS4wNTc2IDMzLjA1NzYgNzcgNDMgNzdIMTA3QzExNi45NDIgNzcgMTI1IDg1LjA1NzYgMTI1IDk1VjEyNUMxMjUgMTM0Ljk0MiAxMTYuOTQyIDE0MyAxMDcgMTQzSDQzQzMzLjA1NzYgMTQzIDI1IDEzNC45NDIgMjUgMTI1Vjk1WiIgZmlsbD0iI0NDQyIvPgo8L3N2Zz4K" alt="Profil Fotoğrafı">
                             <div class="photo-overlay">
-                                <label for="photo-upload" class="photo-upload-btn">Fotoğraf Değiştir</label>
-                                <input type="file" id="photo-upload" accept="image/*" style="display: none;">
+                                <div class="photo-buttons">
+                                    <label for="photo-upload" class="photo-upload-btn">Fotoğraf Değiştir</label>
+                                    <input type="file" id="photo-upload" accept="image/*" style="display: none;">
+                                    <button type="button" onclick="removeProfilePhoto()" class="photo-remove-btn" id="remove-photo-btn">Fotoğrafı Kaldır</button>
+                                </div>
                             </div>
                         </div>
+                        <div id="photo-message" class="message"></div>
                     </div>
 
                     <!-- Profile Info -->
@@ -122,6 +126,7 @@
                             <!-- Username Edit Form -->
                             <form id="username-edit-form" class="edit-form" style="display: none;">
                                 <input type="text" id="new-username" placeholder="Yeni Kullanıcı Adı" required>
+                                <div id="username-message" class="message"></div>
                                 <div class="form-buttons">
                                     <button type="submit">Kaydet</button>
                                     <button type="button" onclick="cancelUsernameEdit()">İptal</button>
@@ -138,6 +143,7 @@
                             <!-- Email Change Form -->
                             <form id="email-change-form" class="edit-form" style="display: none;">
                                 <input type="email" id="new-email" placeholder="Yeni Email Adresi" required>
+                                <div id="email-message" class="message"></div>
                                 <div class="form-buttons">
                                     <button type="submit">Değiştir</button>
                                     <button type="button" onclick="cancelEmailEdit()">İptal</button>
@@ -152,6 +158,7 @@
                         <form id="change-password-form" class="edit-form">
                             <input type="password" id="current-password" placeholder="Mevcut Şifre" required>
                             <input type="password" id="new-password" placeholder="Yeni Şifre" required>
+                            <div id="password-message" class="message"></div>
                             <div class="form-buttons">
                                 <button type="submit">Şifre Değiştir</button>
                             </div>

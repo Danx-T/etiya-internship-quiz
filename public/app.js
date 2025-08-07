@@ -230,6 +230,9 @@ function showMainApp() {
     if (currentUser.profilePhoto) {
         document.getElementById('profile-photo-img').src = currentUser.profilePhoto;
     }
+    
+    // Profil fotoğrafı placeholder kontrolü
+    checkProfilePhotoPlaceholder();
 }
 
 // Logout
@@ -558,6 +561,7 @@ async function handleChangePassword(e) {
     
     const currentPassword = document.getElementById('current-password').value;
     const newPassword = document.getElementById('new-password').value;
+    const messageElement = document.getElementById('password-message');
     
     try {
         const response = await fetch(`${API_BASE}/auth/change-password`, {
@@ -570,14 +574,22 @@ async function handleChangePassword(e) {
         });
         
         if (response.ok) {
-            alert('Şifre başarıyla değiştirildi');
+            messageElement.textContent = 'Şifre başarıyla değiştirildi';
+            messageElement.className = 'message success';
             document.getElementById('change-password-form').reset();
+            // 3 saniye sonra mesajı temizle
+            setTimeout(() => {
+                messageElement.textContent = '';
+                messageElement.className = 'message';
+            }, 3000);
         } else {
             const data = await response.json();
-            alert(data.message || 'Şifre değiştirilemedi');
+            messageElement.textContent = data.message || 'Şifre değiştirilemedi';
+            messageElement.className = 'message error';
         }
     } catch (error) {
-        alert('Bağlantı hatası');
+        messageElement.textContent = 'Bağlantı hatası';
+        messageElement.className = 'message error';
     }
 }
 
@@ -588,13 +600,19 @@ function editUsername() {
 }
 
 function cancelUsernameEdit() {
-    document.getElementById('username-edit-form').style.display = 'none';
+    const form = document.getElementById('username-edit-form');
+    const messageElement = document.getElementById('username-message');
+    form.style.display = 'none';
+    messageElement.textContent = '';
+    messageElement.className = 'message';
+    form.reset();
 }
 
 async function handleUsernameUpdate(e) {
     e.preventDefault();
     
     const newUsername = document.getElementById('new-username').value;
+    const messageElement = document.getElementById('username-message');
     
     try {
         const response = await fetch(`${API_BASE}/auth/profile/username`, {
@@ -607,17 +625,23 @@ async function handleUsernameUpdate(e) {
         });
         
         if (response.ok) {
-            alert('Kullanıcı adı başarıyla güncellendi');
+            messageElement.textContent = 'Kullanıcı adı başarıyla güncellendi';
+            messageElement.className = 'message success';
             currentUser.username = newUsername;
             document.getElementById('profile-username').textContent = newUsername;
             document.getElementById('username-display').textContent = newUsername;
+            
+            // 2 saniye bekle, sonra formu kapat
+            await new Promise(resolve => setTimeout(resolve, 2000));
             cancelUsernameEdit();
         } else {
             const data = await response.json();
-            alert(data.message || 'Kullanıcı adı güncellenemedi');
+            messageElement.textContent = data.message || 'Kullanıcı adı güncellenemedi';
+            messageElement.className = 'message error';
         }
     } catch (error) {
-        alert('Bağlantı hatası');
+        messageElement.textContent = 'Bağlantı hatası';
+        messageElement.className = 'message error';
     }
 }
 
@@ -627,13 +651,19 @@ function editEmail() {
 }
 
 function cancelEmailEdit() {
-    document.getElementById('email-change-form').style.display = 'none';
+    const form = document.getElementById('email-change-form');
+    const messageElement = document.getElementById('email-message');
+    form.style.display = 'none';
+    messageElement.textContent = '';
+    messageElement.className = 'message';
+    form.reset();
 }
 
 async function handleEmailChange(e) {
     e.preventDefault();
     
     const newEmail = document.getElementById('new-email').value;
+    const messageElement = document.getElementById('email-message');
     
     try {
         const response = await fetch(`${API_BASE}/auth/change-email`, {
@@ -646,14 +676,21 @@ async function handleEmailChange(e) {
         });
         
         if (response.ok) {
-            document.getElementById('email-change-form').style.display = 'none';
+            messageElement.textContent = 'Doğrulama kodu email adresinize gönderildi';
+            messageElement.className = 'message success';
+            
+            // 2 saniye bekle, sonra formu kapat ve modalı aç
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            cancelEmailEdit();
             showEmailVerificationModal(newEmail);
         } else {
             const data = await response.json();
-            alert(data.message || 'Email değiştirilemedi');
+            messageElement.textContent = data.message || 'Email değiştirilemedi';
+            messageElement.className = 'message error';
         }
     } catch (error) {
-        alert('Bağlantı hatası');
+        messageElement.textContent = 'Bağlantı hatası';
+        messageElement.className = 'message error';
     }
 }
 
@@ -667,13 +704,19 @@ function showEmailVerificationModal(email) {
 }
 
 function closeEmailVerificationModal() {
-    document.getElementById('email-verification-modal').style.display = 'none';
+    const modal = document.getElementById('email-verification-modal');
+    const messageElement = document.getElementById('verification-message');
+    modal.style.display = 'none';
+    messageElement.textContent = '';
+    messageElement.className = 'message';
+    document.getElementById('email-verification-code').value = '';
 }
 
 async function handleEmailVerification(e) {
     e.preventDefault();
     
     const code = document.getElementById('email-verification-code').value;
+    const messageElement = document.getElementById('verification-message');
     
     try {
         const response = await fetch(`${API_BASE}/auth/verify-new-email`, {
@@ -686,23 +729,81 @@ async function handleEmailVerification(e) {
         });
         
         if (response.ok) {
-            alert('Email adresi başarıyla değiştirildi');
+            messageElement.textContent = 'Email adresi başarıyla değiştirildi';
+            messageElement.className = 'message success';
+            
+            // 2 saniye bekle, sonra modalı kapat ve profili güncelle
+            await new Promise(resolve => setTimeout(resolve, 2000));
             closeEmailVerificationModal();
-            // Refresh user data
             await fetchUserProfile();
         } else {
             const data = await response.json();
-            alert(data.message || 'Email doğrulanamadı');
+            messageElement.textContent = data.message || 'Email doğrulanamadı';
+            messageElement.className = 'message error';
         }
     } catch (error) {
-        alert('Bağlantı hatası');
+        messageElement.textContent = 'Bağlantı hatası';
+        messageElement.className = 'message error';
     }
 }
 
 // Profile photo functions
+function checkProfilePhotoPlaceholder() {
+    const defaultPhotoBase64 = 'PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgdmlld0JveD0iMCAwIDE1MCAxNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxNTAiIGhlaWdodD0iMTUwIiBmaWxsPSIjRjVGNUY1Ii8+CjxjaXJjbGUgY3g9Ijc1IiBjeT0iNjAiIHI9IjIwIiBmaWxsPSIjQ0NDIi8+CjxwYXRoIGQ9Ik0yNSA5NUMyNSA4NS4wNTc2IDMzLjA1NzYgNzcgNDMgNzdIMTA3QzExNi45NDIgNzcgMTI1IDg1LjA1NzYgMTI1IDk1VjEyNUMxMjUgMTM0Ljk0MiAxMTYuOTQyIDE0MyAxMDcgMTQzSDQzQzMzLjA1NzYgMTQzIDI1IDEzNC45NDIgMjUgMTI1Vjk1WiIgZmlsbD0iI0NDQyIvPgo8L3N2Zz4K';
+    const profileImg = document.getElementById('profile-photo-img');
+    const removeBtn = document.getElementById('remove-photo-btn');
+    
+    if (profileImg.src.includes(defaultPhotoBase64)) {
+        removeBtn.style.display = 'none';
+    } else {
+        removeBtn.style.display = 'block';
+    }
+}
+
+// Profil fotoğrafı değiştiğinde kontrol et
+document.getElementById('profile-photo-img').addEventListener('load', checkProfilePhotoPlaceholder);
+
+async function removeProfilePhoto() {
+    const messageElement = document.getElementById('photo-message');
+    const defaultPhotoUrl = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgdmlld0JveD0iMCAwIDE1MCAxNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxNTAiIGhlaWdodD0iMTUwIiBmaWxsPSIjRjVGNUY1Ii8+CjxjaXJjbGUgY3g9Ijc1IiBjeT0iNjAiIHI9IjIwIiBmaWxsPSIjQ0NDIi8+CjxwYXRoIGQ9Ik0yNSA5NUMyNSA4NS4wNTc2IDMzLjA1NzYgNzcgNDMgNzdIMTA3QzExNi45NDIgNzcgMTI1IDg1LjA1NzYgMTI1IDk1VjEyNUMxMjUgMTM0Ljk0MiAxMTYuOTQyIDE0MyAxMDcgMTQzSDQzQzMzLjA1NzYgMTQzIDI1IDEzNC45NDIgMjUgMTI1Vjk1WiIgZmlsbD0iI0NDQyIvPgo8L3N2Zz4K';
+    
+    try {
+        const response = await fetch(`${API_BASE}/auth/profile/photo`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            },
+            body: JSON.stringify({ photoUrl: null }), // null göndererek fotoğrafı kaldır
+        });
+        
+                    if (response.ok) {
+                document.getElementById('profile-photo-img').src = defaultPhotoUrl;
+                messageElement.textContent = 'Profil fotoğrafı kaldırıldı';
+                messageElement.className = 'message success';
+                document.getElementById('remove-photo-btn').style.display = 'none';
+                
+                // 3 saniye sonra mesajı temizle
+                setTimeout(() => {
+                    messageElement.textContent = '';
+                    messageElement.className = 'message';
+                }, 3000);
+        } else {
+            const data = await response.json();
+            messageElement.textContent = data.message || 'Profil fotoğrafı kaldırılamadı';
+            messageElement.className = 'message error';
+        }
+    } catch (error) {
+        messageElement.textContent = 'Bağlantı hatası';
+        messageElement.className = 'message error';
+    }
+}
 async function handlePhotoUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
+    
+    const messageElement = document.getElementById('photo-message');
+    const removeBtn = document.getElementById('remove-photo-btn');
     
     // For now, we'll use a placeholder URL
     // In a real app, you'd upload to a server and get the URL
@@ -718,15 +819,25 @@ async function handlePhotoUpload(e) {
             body: JSON.stringify({ photoUrl }),
         });
         
-        if (response.ok) {
-            document.getElementById('profile-photo-img').src = photoUrl;
-            alert('Profil fotoğrafı başarıyla güncellendi');
+            if (response.ok) {
+                document.getElementById('profile-photo-img').src = photoUrl;
+                messageElement.textContent = 'Profil fotoğrafı başarıyla güncellendi';
+                messageElement.className = 'message success';
+                removeBtn.style.display = 'block';
+            
+            // 3 saniye sonra mesajı temizle
+            setTimeout(() => {
+                messageElement.textContent = '';
+                messageElement.className = 'message';
+            }, 3000);
         } else {
             const data = await response.json();
-            alert(data.message || 'Profil fotoğrafı güncellenemedi');
+            messageElement.textContent = data.message || 'Profil fotoğrafı güncellenemedi';
+            messageElement.className = 'message error';
         }
     } catch (error) {
-        alert('Bağlantı hatası');
+        messageElement.textContent = 'Bağlantı hatası';
+        messageElement.className = 'message error';
     }
 }
 

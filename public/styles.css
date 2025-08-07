@@ -566,10 +566,14 @@ body {
     transform: translateY(0);
 }
 
-.photo-upload-btn {
+.photo-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.photo-upload-btn, .photo-remove-btn {
     cursor: pointer;
-    background: rgba(255, 255, 255, 0.9);
-    color: #333;
     padding: 6px 12px;
     border-radius: 15px;
     font-size: 12px;
@@ -578,8 +582,23 @@ body {
     transition: all 0.3s ease;
 }
 
+.photo-upload-btn {
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+}
+
 .photo-upload-btn:hover {
     background: white;
+    transform: scale(1.05);
+}
+
+.photo-remove-btn {
+    background: rgba(220, 53, 69, 0.9);
+    color: white;
+}
+
+.photo-remove-btn:hover {
+    background: rgba(220, 53, 69, 1);
     transform: scale(1.05);
 }
 
@@ -735,6 +754,23 @@ body {
     margin-bottom: 20px;
     color: #333;
     font-size: 18px;
+}
+
+/* Message Styles */
+.message {
+    margin: 10px 0;
+    padding: 5px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.message.success {
+    color: #28a745;
+}
+
+.message.error {
+    color: #dc3545;
 }
 
 /* Responsive */
