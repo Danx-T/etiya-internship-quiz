@@ -685,6 +685,13 @@ async function handleUsernameUpdate(e) {
     const newUsername = document.getElementById('new-username').value;
     const messageElement = document.getElementById('username-message');
     
+    // Mevcut kullanıcı adı ile aynı mı kontrol et
+    if (newUsername === currentUser.username) {
+        messageElement.textContent = 'Girdiğiniz kullanıcı adı zaten mevcut kullanıcı adınızla aynı.';
+        messageElement.className = 'message error';
+        return;
+    }
+    
     try {
         const response = await fetch(`${API_BASE}/auth/profile/username`, {
             method: 'PUT',
@@ -735,6 +742,13 @@ async function handleEmailChange(e) {
     
     const newEmail = document.getElementById('new-email').value;
     const messageElement = document.getElementById('email-message');
+    
+    // Mevcut email ile aynı mı kontrol et
+    if (newEmail === currentUser.email) {
+        messageElement.textContent = 'Girdiğiniz e-posta adresi, mevcut e-posta adresinizle aynı.';
+        messageElement.className = 'message error';
+        return;
+    }
     
     try {
         const response = await fetch(`${API_BASE}/auth/change-email`, {
