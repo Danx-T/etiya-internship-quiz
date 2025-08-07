@@ -168,10 +168,21 @@ async function handleRegister(e) {
     }
 }
 
-function showEmailVerificationModal() {
-    emailVerificationModal.style.display = 'flex';
-    verificationInfo.textContent = 'Kod 10 dakika geçerlidir.';
-    verificationCodeInput.value = '';
+function showEmailVerificationModal(email) {
+    const modal = document.getElementById('email-verification-modal');
+    const modalContent = modal.querySelector('.modal-content p');
+    
+    // Email parametresi verilmişse onu kullan, yoksa pendingVerificationEmail'i kullan
+    const targetEmail = email || pendingVerificationEmail;
+    
+    if (targetEmail) {
+        modalContent.textContent = `${targetEmail} adresine doğrulama kodu gönderildi. Lütfen kodu girin.`;
+    } else {
+        modalContent.textContent = 'Email adresinize doğrulama kodu gönderildi. Lütfen kodu girin.';
+    }
+    
+    modal.style.display = 'flex';
+    document.getElementById('email-verification-code').value = '';
 }
 
 async function handleUnverifiedLogin() {
@@ -837,14 +848,7 @@ async function handleEmailChange(e) {
     }
 }
 
-function showEmailVerificationModal(email) {
-    const modal = document.getElementById('email-verification-modal');
-    const modalContent = modal.querySelector('.modal-content p');
-    
-    modalContent.textContent = `${email} adresine kod gönderildi.`;
-    modal.style.display = 'flex';
-    document.getElementById('email-verification-code').value = '';
-}
+
 
 function closeEmailVerificationModal() {
     const modal = document.getElementById('email-verification-modal');
