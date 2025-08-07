@@ -300,6 +300,7 @@ function showMainApp() {
     // Set profile photo if exists
     if (currentUser.profilePhoto) {
         document.getElementById('profile-photo-img').src = currentUser.profilePhoto;
+        document.getElementById('header-profile-photo').src = currentUser.profilePhoto;
     }
     
     // Profil fotoğrafı placeholder kontrolü
@@ -917,17 +918,24 @@ async function removeProfilePhoto() {
             body: JSON.stringify({ photoUrl: null }), // null göndererek fotoğrafı kaldır
         });
         
-                    if (response.ok) {
-                document.getElementById('profile-photo-img').src = defaultPhotoUrl;
-                messageElement.textContent = 'Profil fotoğrafı kaldırıldı';
-                messageElement.className = 'message success';
-                document.getElementById('remove-photo-btn').style.display = 'none';
-                
-                // 3 saniye sonra mesajı temizle
-                setTimeout(() => {
-                    messageElement.textContent = '';
-                    messageElement.className = 'message';
-                }, 3000);
+                            if (response.ok) {
+            document.getElementById('profile-photo-img').src = defaultPhotoUrl;
+            document.getElementById('header-profile-photo').src = defaultPhotoUrl;
+            
+            // currentUser'ı da güncelle
+            if (currentUser) {
+                currentUser.profilePhoto = null;
+            }
+            
+            messageElement.textContent = 'Profil fotoğrafı kaldırıldı';
+            messageElement.className = 'message success';
+            document.getElementById('remove-photo-btn').style.display = 'none';
+            
+            // 3 saniye sonra mesajı temizle
+            setTimeout(() => {
+                messageElement.textContent = '';
+                messageElement.className = 'message';
+            }, 3000);
         } else {
             const data = await response.json();
             messageElement.textContent = data.message || 'Profil fotoğrafı kaldırılamadı';
@@ -945,9 +953,8 @@ async function handlePhotoUpload(e) {
     const messageElement = document.getElementById('photo-message');
     const removeBtn = document.getElementById('remove-photo-btn');
     
-    // For now, we'll use a placeholder URL
-    // In a real app, you'd upload to a server and get the URL
-    const photoUrl = URL.createObjectURL(file);
+    // Geçici URL oluştur (önizleme için)
+    const tempPhotoUrl = URL.createObjectURL(file);
     
     try {
         const response = await fetch(`${API_BASE}/auth/profile/photo`, {
@@ -956,15 +963,26 @@ async function handlePhotoUpload(e) {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${localStorage.getItem('token')}`,
             },
-            body: JSON.stringify({ photoUrl }),
+            body: JSON.stringify({ photoUrl: tempPhotoUrl }),
         });
         
-            if (response.ok) {
-                document.getElementById('profile-photo-img').src = photoUrl;
-                messageElement.textContent = 'Profil fotoğrafı başarıyla güncellendi';
-                messageElement.className = 'message success';
-                removeBtn.style.display = 'block';
+        if (response.ok) {
+            const data = await response.json();
+            // Backend'den gelen gerçek URL'yi kullan
+            const realPhotoUrl = data.photoUrl || tempPhotoUrl;
             
+            document.getElementById('profile-photo-img').src = realPhotoUrl;
+            document.getElementById('header-profile-photo').src = realPhotoUrl;
+            
+            // currentUser'ı da güncelle
+            if (currentUser) {
+                currentUser.profilePhoto = realPhotoUrl;
+            }
+            
+            messageElement.textContent = 'Profil fotoğrafı başarıyla güncellendi';
+            messageElement.className = 'message success';
+            removeBtn.style.display = 'block';
+        
             // 3 saniye sonra mesajı temizle
             setTimeout(() => {
                 messageElement.textContent = '';
