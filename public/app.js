@@ -868,7 +868,7 @@ async function handleEmailVerification(e) {
         if (response.ok) {
             // Başarılı durumu
             statusIndicator.className = 'verification-status success';
-            submitButton.textContent = 'Başarılı!';
+            submitButton.textContent = 'Tamam';
             submitButton.className = 'verify-button success';
             messageDisplay.textContent = 'Email adresiniz başarıyla değiştirildi!';
             messageDisplay.className = 'verification-message success';

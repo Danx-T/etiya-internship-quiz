@@ -248,17 +248,25 @@ body {
     font-weight: 500;
 }
 
-.verify-button {
-    width: 100%;
+.form-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.verify-button, .resend-button {
+    flex: 1;
     padding: 12px;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 500;
     border: none;
     border-radius: 6px;
-    background-color: #007bff;
     color: white;
     cursor: pointer;
     transition: all 0.3s ease;
+}
+
+.verify-button {
+    background-color: #007bff;
 }
 
 .verify-button:hover {
@@ -279,17 +287,7 @@ body {
 }
 
 .resend-button {
-    width: 100%;
-    margin-top: 10px;
-    padding: 12px;
-    font-size: 14px;
-    font-weight: 500;
-    border: none;
-    border-radius: 6px;
     background-color: #6c757d;
-    color: white;
-    cursor: pointer;
-    transition: all 0.3s ease;
 }
 
 .resend-button:hover {
