@@ -53,7 +53,7 @@ function setupEventListeners() {
     document.getElementById('change-password-form').addEventListener('submit', handleChangePassword);
     document.getElementById('username-edit-form').addEventListener('submit', handleUsernameUpdate);
     document.getElementById('email-change-form').addEventListener('submit', handleEmailChange);
-    document.getElementById('email-verification-form').addEventListener('submit', handleEmailVerification);
+    // Email verification form listener aşağıda tanımlandı
     document.getElementById('photo-upload').addEventListener('change', handlePhotoUpload);
 }
 
@@ -102,11 +102,22 @@ async function handleLogin(e) {
         const data = await response.json();
         
         if (response.ok) {
+            console.log('Login response data:', data);
             // Email doğrulanmış mı kontrol et
             if (data.user && data.user.isEmailVerified === false) {
+                console.log('Email doğrulanmamış, pendingEmail:', data.user.email);
                 pendingVerificationEmail = data.user.email;
-                messageElement.innerHTML = 'Hesabınızı kullanabilmek için e-postanızı <span class="verify-link" onclick="handleUnverifiedLogin()">doğrulayın</span>.';
+                messageElement.innerHTML = 'Hesabınızı kullanabilmek için e-postanızı <span class="verify-link" id="verify-email-link">doğrulayın</span>.';
                 messageElement.className = 'message error';
+                
+                // Event listener ekle
+                setTimeout(() => {
+                    const verifyLink = document.getElementById('verify-email-link');
+                    if (verifyLink) {
+                        verifyLink.addEventListener('click', handleUnverifiedLogin);
+                    }
+                }, 100);
+                
                 return;
             }
             
@@ -149,9 +160,18 @@ async function handleRegister(e) {
         const data = await response.json();
         
         if (response.ok) {
+            console.log('Register response data:', data);
             if (data.user && data.user.isEmailVerified === false) {
+                console.log('Kayıt sonrası email doğrulanmamış, pendingEmail:', data.user.email);
                 pendingVerificationEmail = data.user.email;
-                showEmailVerificationModal();
+                messageElement.textContent = `Hesabınız oluşturuldu! ${data.user.email} adresine doğrulama kodu gönderildi.`;
+                messageElement.className = 'message success';
+                
+                // 2 saniye sonra modalı aç
+                setTimeout(() => {
+                    console.log('Modal açılıyor...');
+                    showEmailVerificationModal();
+                }, 2000);
             } else {
                 localStorage.setItem('token', data.access_token);
                 currentUser = data.user;
@@ -169,6 +189,7 @@ async function handleRegister(e) {
 }
 
 function showEmailVerificationModal(email) {
+    console.log('showEmailVerificationModal çağrıldı, email param:', email, 'pendingEmail:', pendingVerificationEmail);
     const modal = document.getElementById('email-verification-modal');
     const modalContent = modal.querySelector('.modal-content p');
     
@@ -181,25 +202,48 @@ function showEmailVerificationModal(email) {
         modalContent.textContent = 'Email adresinize doğrulama kodu gönderildi. Lütfen kodu girin.';
     }
     
+    console.log('Modal açılıyor, targetEmail:', targetEmail);
     modal.style.display = 'flex';
     document.getElementById('email-verification-code').value = '';
 }
 
 async function handleUnverifiedLogin() {
+    console.log('handleUnverifiedLogin çağrıldı, pendingEmail:', pendingVerificationEmail);
+    const messageElement = document.getElementById('login-error');
+    
+    // Kullanıcıya geri bildirim ver
+    messageElement.textContent = 'Doğrulama kodu gönderiliyor...';
+    messageElement.className = 'message';
+    
     // Email doğrulama kodu gönder ve modalı aç
     try {
-        await fetch(`${API_BASE}/auth/resend-email-verification`, {
+        const response = await fetch(`${API_BASE}/auth/resend-email-verification`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ email: pendingVerificationEmail }),
         });
+        
+        if (response.ok) {
+            messageElement.textContent = `${pendingVerificationEmail} adresine yeni doğrulama kodu gönderildi!`;
+            messageElement.className = 'message success';
+            
+            // 2 saniye sonra modalı aç
+            setTimeout(() => {
+                console.log('2 saniye sonra modal açılıyor...');
+                showEmailVerificationModal();
+            }, 2000);
+        } else {
+            const data = await response.json();
+            messageElement.textContent = data.message || 'Doğrulama kodu gönderilemedi';
+            messageElement.className = 'message error';
+        }
     } catch (error) {
         console.error('Kod gönderme hatası:', error);
+        messageElement.textContent = 'Bağlantı hatası - doğrulama kodu gönderilemedi';
+        messageElement.className = 'message error';
     }
-    
-    showEmailVerificationModal();
 }
 
 document.getElementById('email-verification-form').addEventListener('submit', async (e) => {
@@ -212,7 +256,11 @@ document.getElementById('email-verification-form').addEventListener('submit', as
     const submitButton = form.querySelector('button[type="submit"]');
     
     const code = codeInput.value.trim();
-    if (!code || !pendingVerificationEmail) return;
+    const token = localStorage.getItem('token');
+    
+    // İlk kayıt doğrulaması için pendingVerificationEmail gerekli
+    // Email değiştirme doğrulaması için token yeterli
+    if (!code || (!token && !pendingVerificationEmail)) return;
 
     // UI'ı yükleniyor durumuna getir
     submitButton.disabled = true;
@@ -223,7 +271,6 @@ document.getElementById('email-verification-form').addEventListener('submit', as
 
     try {
         // Eğer token varsa email değiştirme doğrulaması, yoksa ilk kayıt doğrulaması
-        const token = localStorage.getItem('token');
         let endpoint = token ? 'verify-new-email' : 'verify-email';
         let headers = {
             'Content-Type': 'application/json'
@@ -252,7 +299,7 @@ document.getElementById('email-verification-form').addEventListener('submit', as
             
             const successMessage = token ? 
                 'Email adresiniz başarıyla değiştirildi!' : 
-                'Email adresiniz doğrulandı!';
+                'Email adresiniz doğrulandı! Giriş yapılıyor...';
             
             messageDisplay.textContent = successMessage;
             messageDisplay.className = 'verification-message success';
@@ -267,6 +314,18 @@ document.getElementById('email-verification-form').addEventListener('submit', as
             submitButton.className = 'verify-button';
             submitButton.disabled = false;
             messageDisplay.textContent = '';
+            
+            // Eğer ilk kayıt doğrulaması ise (token yoksa), otomatik login yap
+            if (!token && pendingVerificationEmail && data.access_token) {
+                localStorage.setItem('token', data.access_token);
+                currentUser = data.user;
+                showMainApp();
+                loadQuizzes();
+            }
+            
+            // PendingVerificationEmail'i temizle
+            pendingVerificationEmail = null;
+            
             messageDisplay.className = 'verification-message';
             codeInput.value = '';
             
@@ -859,95 +918,7 @@ function closeEmailVerificationModal() {
     document.getElementById('email-verification-code').value = '';
 }
 
-async function handleEmailVerification(e) {
-    e.preventDefault();
-    
-    const form = e.target;
-    const codeInput = form.querySelector('#email-verification-code');
-    const statusIndicator = form.querySelector('.verification-status');
-    const messageDisplay = form.querySelector('.verification-message');
-    const submitButton = form.querySelector('button[type="submit"]');
-    
-    const code = codeInput.value.trim();
-    if (!code) return;
-
-    // UI'ı yükleniyor durumuna getir
-    submitButton.disabled = true;
-    submitButton.textContent = 'Doğrulanıyor...';
-    statusIndicator.className = 'verification-status loading';
-    messageDisplay.textContent = '';
-    messageDisplay.className = 'verification-message';
-
-    try {
-        const response = await fetch(`${API_BASE}/auth/verify-new-email`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            },
-            body: JSON.stringify({ code }),
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-            // Başarılı durumu
-            statusIndicator.className = 'verification-status success';
-            submitButton.textContent = 'Tamam';
-            submitButton.className = 'verify-button success';
-            messageDisplay.textContent = 'Email adresiniz başarıyla değiştirildi!';
-            messageDisplay.className = 'verification-message success';
-            
-            // 3 saniye bekle
-            await new Promise(resolve => setTimeout(resolve, 3000));
-            
-            // Modalı kapat ve her şeyi sıfırla
-            emailVerificationModal.style.display = 'none';
-            statusIndicator.className = 'verification-status';
-            submitButton.textContent = 'Doğrula';
-            submitButton.className = 'verify-button';
-            submitButton.disabled = false;
-            messageDisplay.textContent = '';
-            messageDisplay.className = 'verification-message';
-            codeInput.value = '';
-            
-            // Profili güncelle
-            await fetchUserProfile();
-        } else {
-            // Hata durumu
-            statusIndicator.className = 'verification-status error';
-            submitButton.textContent = 'Tekrar Dene';
-            submitButton.className = 'verify-button error';
-            submitButton.disabled = false;
-            
-            messageDisplay.textContent = data.message || 'Doğrulama başarısız';
-            messageDisplay.className = 'verification-message error';
-            
-            // Input'u temizle ve fokusla
-            codeInput.value = '';
-            codeInput.focus();
-            
-            // 2 saniye sonra butonu normale döndür
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            submitButton.textContent = 'Doğrula';
-            submitButton.className = 'verify-button';
-        }
-    } catch (error) {
-        // Bağlantı hatası
-        statusIndicator.className = 'verification-status error';
-        submitButton.textContent = 'Tekrar Dene';
-        submitButton.className = 'verify-button error';
-        submitButton.disabled = false;
-        
-        messageDisplay.textContent = 'Bağlantı hatası! Lütfen tekrar deneyin.';
-        messageDisplay.className = 'verification-message error';
-        
-        // 2 saniye sonra butonu normale döndür
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        submitButton.textContent = 'Doğrula';
-        submitButton.className = 'verify-button';
-    }
-}
+// handleEmailVerification fonksiyonu kaldırıldı - inline event listener kullanılıyor
 
 // Profile photo functions
 function checkProfilePhotoPlaceholder() {

@@ -937,4 +937,17 @@ body {
         flex-direction: column;
         gap: 15px;
     }
+}
+
+/* Email doğrulama linki */
+.verify-link {
+    color: #007bff;
+    text-decoration: underline;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.verify-link:hover {
+    color: #0056b3;
+    text-decoration: none;
 } 

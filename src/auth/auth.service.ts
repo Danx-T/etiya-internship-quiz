@@ -59,8 +59,21 @@ export class AuthService {
     if (new Date() > user.emailVerificationExpires) {
       throw new UnauthorizedException('Doğrulama kodunun süresi dolmuş');
     }
+    
     await this.usersService.setEmailVerified(user.id);
-    return { message: 'E-posta başarıyla doğrulandı' };
+    
+    // İlk kayıt doğrulaması için JWT token oluştur ve kullanıcı bilgilerini döndür
+    const payload = { username: user.username, sub: user.id };
+    return { 
+      message: 'E-posta başarıyla doğrulandı',
+      access_token: this.jwtService.sign(payload, { expiresIn: '1h' }),
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        isEmailVerified: true,
+      }
+    };
   }
 
   async login(loginDto: LoginDto) {
@@ -68,12 +81,22 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('Geçersiz kullanıcı adı veya şifre');
     }
-    if (!user.isEmailVerified) {
-      throw new UnauthorizedException('E-posta adresiniz doğrulanmamış. Lütfen e-posta adresinize gelen kod ile hesabınızı doğrulayın.');
-    }
     const isPasswordValid = await bcrypt.compare(loginDto.password, user.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Geçersiz kullanıcı adı veya şifre');
+    }
+    
+    // Email doğrulanmamış kullanıcılar için hata atmak yerine bilgi döndür
+    if (!user.isEmailVerified) {
+      return {
+        access_token: null, // Token verme
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          isEmailVerified: false,
+        },
+      };
     }
     
     const payload = { username: user.username, sub: user.id };
@@ -85,6 +108,7 @@ export class AuthService {
         id: user.id,
         username: user.username,
         email: user.email,
+        isEmailVerified: true,
       },
     };
   }
