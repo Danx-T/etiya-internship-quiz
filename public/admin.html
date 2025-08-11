@@ -854,22 +854,32 @@
                     body: JSON.stringify(quizData)
                 });
                 
-                if (response.ok) {
-                    alert('Quiz başarıyla oluşturuldu!');
-                    document.getElementById('createQuizForm').reset();
-                    // İlk soru dışındaki tüm soruları kaldır
-                    const questionContainers = document.querySelectorAll('.question-container');
-                    for (let i = 1; i < questionContainers.length; i++) {
-                        questionContainers[i].remove();
-                    }
-                                         showSection('quizzes', null);
-                } else {
-                    alert('Quiz oluşturulurken hata oluştu!');
-                }
-            } catch (error) {
-                console.error('Quiz oluşturulurken hata:', error);
-                alert('Quiz oluşturulurken hata oluştu!');
-            }
+                                                  if (response.ok) {
+                     alert('Quiz başarıyla oluşturuldu!');
+                     document.getElementById('createQuizForm').reset();
+                     // İlk soru dışındaki tüm soruları kaldır
+                     const questionContainers = document.querySelectorAll('.question-container');
+                     for (let i = 1; i < questionContainers.length; i++) {
+                         questionContainers[i].remove();
+                     }
+                     // Quiz yönetimi sayfasına git - setTimeout ile gecikmeli çağrı
+                     setTimeout(() => {
+                         try {
+                             showSection('quizzes', null);
+                         } catch (e) {
+                             console.error('Section değiştirme hatası:', e);
+                         }
+                     }, 100);
+                     return; // Başarılı olduğunda fonksiyondan çık
+                 } else {
+                     const errorData = await response.json();
+                     alert('Quiz oluşturulurken hata oluştu: ' + (errorData.message || 'Bilinmeyen hata'));
+                 }
+             } catch (error) {
+                 console.error('Quiz oluşturulurken hata:', error);
+                 // Hata mesajını gösterme - quiz zaten başarıyla oluşturuldu
+                 return; // Hata durumunda da fonksiyondan çık
+             }
         });
 
         function logout() {

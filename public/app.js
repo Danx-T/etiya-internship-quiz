@@ -482,14 +482,18 @@ async function handleForgotPassword(e) {
 }
 
 // Show section
-function showSection(section) {
+function showSection(section, event = null) {
     // Hide all sections
     document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
     document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
     
     // Show selected section
     document.getElementById(`${section}-section`).style.display = 'block';
-    event.target.classList.add('active');
+    
+    // Seçilen nav button'a active class'ı ekle (eğer event varsa)
+    if (event && event.target) {
+        event.target.classList.add('active');
+    }
     
     // Load section data
     switch (section) {
@@ -672,10 +676,27 @@ async function submitQuiz() {
         if (response.ok) {
             const result = await response.json();
             alert(`Quiz tamamlandı! Skorunuz: ${result.score}/${result.totalQuestions}`);
-            showSection('quizzes');
+            
+            // Quiz'i sıfırla
+            currentQuiz = null;
+            currentQuestionIndex = 0;
+            userAnswers = [];
+            timeSpent = 0;
+            
+            // Güvenli şekilde section değiştir
+            try {
+                showSection('quizzes', null);
+            } catch (e) {
+                console.error('Section değiştirme hatası:', e);
+                // Hata olsa bile quiz başarıyla tamamlandı
+            }
+        } else {
+            const errorData = await response.json();
+            alert('Quiz gönderilemedi: ' + (errorData.message || 'Bilinmeyen hata'));
         }
     } catch (error) {
-        alert('Quiz gönderilemedi');
+        console.error('Quiz submit hatası:', error);
+        alert('Quiz gönderilemedi: Bağlantı hatası');
     }
 }
 
