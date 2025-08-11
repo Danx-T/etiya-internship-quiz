@@ -66,4 +66,9 @@ export class QuizService {
 
     return quiz;
   }
+
+  // Admin paneli için gerekli metod
+  async count(): Promise<number> {
+    return this.quizRepository.count();
+  }
 } 

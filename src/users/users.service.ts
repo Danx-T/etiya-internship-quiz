@@ -194,4 +194,23 @@ export class UsersService {
       passwordChangeExpires: null,
     });
   }
+
+  // Admin paneli için gerekli metodlar
+  async findAll(): Promise<User[]> {
+    return this.usersRepository.find();
+  }
+
+  async updateAdminStatus(userId: number, isAdmin: boolean): Promise<User> {
+    const user = await this.findById(userId);
+    if (!user) {
+      throw new NotFoundException('Kullanıcı bulunamadı');
+    }
+
+    user.isAdmin = isAdmin;
+    return this.usersRepository.save(user);
+  }
+
+  async count(): Promise<number> {
+    return this.usersRepository.count();
+  }
 } 

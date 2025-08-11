@@ -77,4 +77,29 @@ export class ResultsService {
 
     return query.getRawMany();
   }
+
+  // Admin paneli için gerekli metodlar
+  async findAll(): Promise<Result[]> {
+    return this.resultRepository.find({
+      relations: ['user', 'quiz'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async findById(id: number): Promise<Result> {
+    const result = await this.resultRepository.findOne({
+      where: { id },
+      relations: ['user', 'quiz'],
+    });
+    
+    if (!result) {
+      throw new NotFoundException('Sonuç bulunamadı');
+    }
+    
+    return result;
+  }
+
+  async count(): Promise<number> {
+    return this.resultRepository.count();
+  }
 } 
