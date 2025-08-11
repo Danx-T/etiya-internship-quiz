@@ -109,6 +109,7 @@ export class AuthService {
         username: user.username,
         email: user.email,
         isEmailVerified: true,
+        isAdmin: user.isAdmin,
       },
     };
   }
