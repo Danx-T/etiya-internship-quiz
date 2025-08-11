@@ -71,4 +71,18 @@ export class QuizService {
   async count(): Promise<number> {
     return this.quizRepository.count();
   }
+
+  // Quiz silme metodu
+  async deleteQuiz(id: number): Promise<void> {
+    const quiz = await this.getQuizById(id);
+    if (!quiz) {
+      throw new NotFoundException('Quiz bulunamadı');
+    }
+
+    // Önce soruları sil
+    await this.questionRepository.delete({ quizId: id });
+    
+    // Sonra quiz'i sil
+    await this.quizRepository.remove(quiz);
+  }
 } 

@@ -285,11 +285,11 @@
         </div>
 
         <div class="admin-nav">
-            <button onclick="showSection('dashboard')" class="active">📊 Dashboard</button>
-            <button onclick="showSection('quizzes')">📝 Quiz Yönetimi</button>
-            <button onclick="showSection('users')">👥 Kullanıcı Yönetimi</button>
-            <button onclick="showSection('results')">📈 Sonuçlar</button>
-            <button onclick="showSection('create-quiz')">➕ Yeni Quiz</button>
+                         <button onclick="showSection('dashboard', event)" class="active">📊 Dashboard</button>
+             <button onclick="showSection('quizzes', event)">📝 Quiz Yönetimi</button>
+             <button onclick="showSection('users', event)">👥 Kullanıcı Yönetimi</button>
+             <button onclick="showSection('results', event)">📈 Sonuçlar</button>
+             <button onclick="showSection('create-quiz', event)">➕ Yeni Quiz</button>
             <button onclick="logout()">🚪 Çıkış</button>
         </div>
 
@@ -351,38 +351,38 @@
                 
                 <div id="questionsContainer">
                     <h3>Sorular</h3>
-                    <div class="question-container">
-                        <div class="form-group">
-                            <label>Soru:</label>
-                            <input type="text" class="question-text" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Seçenek A:</label>
-                            <input type="text" class="option-a" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Seçenek B:</label>
-                            <input type="text" class="option-b" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Seçenek C:</label>
-                            <input type="text" class="option-c" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Seçenek D:</label>
-                            <input type="text" class="option-d" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Doğru Cevap:</label>
-                            <select class="correct-answer" required>
-                                <option value="A">A</option>
-                                <option value="B">B</option>
-                                <option value="C">C</option>
-                                <option value="D">D</option>
-                            </select>
-                        </div>
-                        <button type="button" class="remove-question-btn" onclick="removeQuestion(this)">Sil</button>
-                    </div>
+                                         <div class="question-container">
+                         <div class="form-group">
+                             <label>Soru:</label>
+                             <input type="text" class="question-text" required>
+                         </div>
+                         <div class="form-group">
+                             <label>Seçenek A:</label>
+                             <input type="text" class="option-a" required>
+                         </div>
+                         <div class="form-group">
+                             <label>Seçenek B:</label>
+                             <input type="text" class="option-b" required>
+                         </div>
+                         <div class="form-group">
+                             <label>Seçenek C:</label>
+                             <input type="text" class="option-c" required>
+                         </div>
+                         <div class="form-group">
+                             <label>Seçenek D:</label>
+                             <input type="text" class="option-d" required>
+                         </div>
+                         <div class="form-group">
+                             <label>Doğru Cevap:</label>
+                             <select class="correct-answer" required>
+                                 <option value="0">A</option>
+                                 <option value="1">B</option>
+                                 <option value="2">C</option>
+                                 <option value="3">D</option>
+                             </select>
+                         </div>
+                         <button type="button" class="remove-question-btn" onclick="removeQuestion(this)">Sil</button>
+                     </div>
                 </div>
                 
                 <button type="button" class="add-question-btn" onclick="addQuestion()">+ Soru Ekle</button>
@@ -486,39 +486,41 @@
             document.getElementById('admin-panel').style.display = 'block';
         }
 
-        function showSection(sectionName) {
-            // Tüm section'ları gizle
-            document.querySelectorAll('.admin-content').forEach(section => {
-                section.classList.add('hidden');
-            });
-            
-            // Tüm nav button'larından active class'ını kaldır
-            document.querySelectorAll('.admin-nav button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Seçilen section'ı göster
-            document.getElementById(sectionName).classList.remove('hidden');
-            
-            // Seçilen nav button'a active class'ı ekle
-            event.target.classList.add('active');
-            
-            // Section'a göre veri yükle
-            switch(sectionName) {
-                case 'dashboard':
-                    loadDashboard();
-                    break;
-                case 'quizzes':
-                    loadQuizzes();
-                    break;
-                case 'users':
-                    loadUsers();
-                    break;
-                case 'results':
-                    loadResults();
-                    break;
-            }
-        }
+                 function showSection(sectionName, event = null) {
+             // Tüm section'ları gizle
+             document.querySelectorAll('.admin-content').forEach(section => {
+                 section.classList.add('hidden');
+             });
+             
+             // Tüm nav button'larından active class'ını kaldır
+             document.querySelectorAll('.admin-nav button').forEach(btn => {
+                 btn.classList.remove('active');
+             });
+             
+             // Seçilen section'ı göster
+             document.getElementById(sectionName).classList.remove('hidden');
+             
+             // Seçilen nav button'a active class'ı ekle (eğer event varsa)
+             if (event && event.target) {
+                 event.target.classList.add('active');
+             }
+             
+             // Section'a göre veri yükle
+             switch(sectionName) {
+                 case 'dashboard':
+                     loadDashboard();
+                     break;
+                 case 'quizzes':
+                     loadQuizzes();
+                     break;
+                 case 'users':
+                     loadUsers();
+                     break;
+                 case 'results':
+                     loadResults();
+                     break;
+             }
+         }
 
         async function loadDashboard() {
             try {
@@ -571,6 +573,7 @@
                             <th>Başlık</th>
                             <th>Açıklama</th>
                             <th>Soru Sayısı</th>
+                            <th>İşlemler</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -583,6 +586,9 @@
                         <td>${quiz.title}</td>
                         <td>${quiz.description}</td>
                         <td>${quiz.questions ? quiz.questions.length : 0}</td>
+                        <td>
+                            <button class="action-btn delete-btn" onclick="deleteQuiz(${quiz.id})">🗑️ Sil</button>
+                        </td>
                     </tr>
                 `;
             });
@@ -755,15 +761,15 @@
                     <label>Seçenek D:</label>
                     <input type="text" class="option-d" required>
                 </div>
-                <div class="form-group">
-                    <label>Doğru Cevap:</label>
-                    <select class="correct-answer" required>
-                        <option value="A">A</option>
-                        <option value="B">B</option>
-                        <option value="C">C</option>
-                        <option value="D">D</option>
-                    </select>
-                </div>
+                                 <div class="form-group">
+                     <label>Doğru Cevap:</label>
+                     <select class="correct-answer" required>
+                         <option value="0">A</option>
+                         <option value="1">B</option>
+                         <option value="2">C</option>
+                         <option value="3">D</option>
+                     </select>
+                 </div>
                 <button type="button" class="remove-question-btn" onclick="removeQuestion(this)">Sil</button>
             `;
             container.appendChild(questionDiv);
@@ -773,24 +779,61 @@
             button.parentElement.remove();
         }
 
+        async function deleteQuiz(quizId) {
+            if (!confirm('Bu quiz\'i silmek istediğinizden emin misiniz?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/admin/quiz/${quizId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                    }
+                });
+
+                if (response.ok) {
+                    alert('Quiz başarıyla silindi!');
+                    loadQuizzes(); // Listeyi yenile
+                } else {
+                    alert('Quiz silinirken hata oluştu!');
+                }
+            } catch (error) {
+                console.error('Quiz silinirken hata:', error);
+                alert('Quiz silinirken hata oluştu!');
+            }
+        }
+
         document.getElementById('createQuizForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const questions = [];
             const questionContainers = document.querySelectorAll('.question-container');
             
+            // En az 1 soru olmalı
+            if (questionContainers.length === 0) {
+                alert('En az 1 soru eklemelisiniz!');
+                return;
+            }
+            
             questionContainers.forEach(container => {
-                const questionText = container.querySelector('.question-text').value;
-                const optionA = container.querySelector('.option-a').value;
-                const optionB = container.querySelector('.option-b').value;
-                const optionC = container.querySelector('.option-c').value;
-                const optionD = container.querySelector('.option-d').value;
+                const questionText = container.querySelector('.question-text').value.trim();
+                const optionA = container.querySelector('.option-a').value.trim();
+                const optionB = container.querySelector('.option-b').value.trim();
+                const optionC = container.querySelector('.option-c').value.trim();
+                const optionD = container.querySelector('.option-d').value.trim();
                 const correctAnswer = container.querySelector('.correct-answer').value;
                 
+                // Boş alan kontrolü
+                if (!questionText || !optionA || !optionB || !optionC || !optionD) {
+                    alert('Tüm alanları doldurun!');
+                    return;
+                }
+                
                 questions.push({
-                    question: questionText,
+                    questionText: questionText,
                     options: [optionA, optionB, optionC, optionD],
-                    correctAnswer: correctAnswer
+                    correctAnswer: parseInt(correctAnswer) || 0
                 });
             });
             
@@ -819,7 +862,7 @@
                     for (let i = 1; i < questionContainers.length; i++) {
                         questionContainers[i].remove();
                     }
-                    showSection('quizzes');
+                                         showSection('quizzes', null);
                 } else {
                     alert('Quiz oluşturulurken hata oluştu!');
                 }

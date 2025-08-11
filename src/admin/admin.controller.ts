@@ -30,6 +30,12 @@ export class AdminController {
     return this.quizService.getQuizById(id);
   }
 
+  @Delete('quiz/:id')
+  async deleteQuiz(@Param('id') id: number) {
+    await this.quizService.deleteQuiz(id);
+    return { message: 'Quiz başarıyla silindi' };
+  }
+
   // Kullanıcı yönetimi
   @Get('users')
   async getAllUsers() {
