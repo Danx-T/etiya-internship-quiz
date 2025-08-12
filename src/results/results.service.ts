@@ -56,26 +56,73 @@ export class ResultsService {
   }
 
   async getLeaderboard(quizId?: number): Promise<any[]> {
-    const query = this.resultRepository
-      .createQueryBuilder('result')
-      .leftJoinAndSelect('result.user', 'user')
-      .leftJoinAndSelect('result.quiz', 'quiz')
-      .select([
-        'user.username',
-        'quiz.title',
-        'result.score',
-        'result.totalQuestions',
-        'result.timeSpent',
-        'result.createdAt',
-      ])
-      .orderBy('result.score', 'DESC')
-      .addOrderBy('result.timeSpent', 'ASC');
-
-    if (quizId) {
-      query.where('result.quizId = :quizId', { quizId });
+    console.log('getLeaderboard called with quizId:', quizId);
+    
+    try {
+      if (quizId) {
+        // Belirli bir quiz için liderlik tablosu
+        const results = await this.resultRepository.find({
+          where: { quizId },
+          relations: ['user', 'quiz'],
+          order: { score: 'DESC', timeSpent: 'ASC' },
+        });
+        
+        console.log('Quiz-specific results:', results);
+        
+        // Her kullanıcının en iyi skorunu al
+        const bestScores = new Map();
+        results.forEach(result => {
+          const userId = result.user.id;
+          if (!bestScores.has(userId) || bestScores.get(userId).score < result.score) {
+            bestScores.set(userId, result);
+          }
+        });
+        
+        const leaderboard = Array.from(bestScores.values()).map(result => ({
+          user_username: result.user.username,
+          quiz_title: result.quiz.title,
+          result_score: result.score,
+          result_totalQuestions: result.totalQuestions,
+          result_timeSpent: result.timeSpent,
+          result_createdAt: result.createdAt,
+        }));
+        
+        console.log('Processed leaderboard:', leaderboard);
+        return leaderboard;
+      } else {
+        // Genel liderlik tablosu
+        const results = await this.resultRepository.find({
+          relations: ['user', 'quiz'],
+          order: { score: 'DESC', timeSpent: 'ASC' },
+        });
+        
+        console.log('General results:', results);
+        
+        // Her kullanıcının her quiz için en iyi skorunu al
+        const bestScores = new Map();
+        results.forEach(result => {
+          const key = `${result.user.id}-${result.quiz.id}`;
+          if (!bestScores.has(key) || bestScores.get(key).score < result.score) {
+            bestScores.set(key, result);
+          }
+        });
+        
+        const leaderboard = Array.from(bestScores.values()).map(result => ({
+          user_username: result.user.username,
+          quiz_title: result.quiz.title,
+          result_score: result.score,
+          result_totalQuestions: result.totalQuestions,
+          result_timeSpent: result.timeSpent,
+          result_createdAt: result.createdAt,
+        }));
+        
+        console.log('Processed leaderboard:', leaderboard);
+        return leaderboard;
+      }
+    } catch (error) {
+      console.error('getLeaderboard error:', error);
+      throw error;
     }
-
-    return query.getRawMany();
   }
 
   // Admin paneli için gerekli metodlar

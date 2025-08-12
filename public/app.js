@@ -518,7 +518,12 @@ async function loadQuizzes() {
         const quizzesList = document.getElementById('quizzes-list');
         quizzesList.innerHTML = '';
         
+        // Quiz filter'ı da doldur
+        const quizFilter = document.getElementById('quiz-filter');
+        quizFilter.innerHTML = '<option value="">Tüm Quizler</option>';
+        
         quizzes.forEach(quiz => {
+            // Quiz listesi
             const quizCard = document.createElement('div');
             quizCard.className = 'quiz-card';
             quizCard.innerHTML = `
@@ -531,6 +536,12 @@ async function loadQuizzes() {
             `;
             quizCard.onclick = () => startQuiz(quiz);
             quizzesList.appendChild(quizCard);
+            
+            // Quiz filter dropdown'ı
+            const option = document.createElement('option');
+            option.value = quiz.id;
+            option.textContent = quiz.title;
+            quizFilter.appendChild(option);
         });
     } catch (error) {
         console.error('Quizler yüklenemedi:', error);
@@ -739,16 +750,28 @@ async function loadLeaderboard() {
         const quizFilter = document.getElementById('quiz-filter').value;
         const url = quizFilter ? `${API_BASE}/results/leaderboard?quizId=${quizFilter}` : `${API_BASE}/results/leaderboard`;
         
+        console.log('Loading leaderboard with quizId:', quizFilter);
+        console.log('URL:', url);
+        
         const response = await fetch(url, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`,
             },
         });
         
+        console.log('Response status:', response.status);
+        
         if (response.ok) {
             const leaderboard = await response.json();
+            console.log('Leaderboard data:', leaderboard);
+            
             const leaderboardList = document.getElementById('leaderboard-list');
             leaderboardList.innerHTML = '';
+            
+            if (leaderboard.length === 0) {
+                leaderboardList.innerHTML = '<p>Henüz sonuç bulunmuyor.</p>';
+                return;
+            }
             
             leaderboard.forEach((entry, index) => {
                 const leaderboardItem = document.createElement('div');
@@ -767,9 +790,14 @@ async function loadLeaderboard() {
                 `;
                 leaderboardList.appendChild(leaderboardItem);
             });
+        } else {
+            const errorData = await response.json();
+            console.error('Leaderboard error:', errorData);
+            document.getElementById('leaderboard-list').innerHTML = '<p>Liderlik tablosu yüklenemedi.</p>';
         }
     } catch (error) {
         console.error('Liderlik tablosu yüklenemedi:', error);
+        document.getElementById('leaderboard-list').innerHTML = '<p>Liderlik tablosu yüklenemedi.</p>';
     }
 }
 
